@@ -25,6 +25,17 @@ suite('latex', function() {
     assertParsesLatex('PNZQRCH');
   });
 
+  test('can parse mathbb symbols', function() {
+    assertParsesLatex('\\P\\N\\Z\\Q\\R\\C\\H',
+        '\\mathbb{P}\\mathbb{N}\\mathbb{Z}\\mathbb{Q}\\mathbb{R}\\mathbb{C}\\mathbb{H}');
+    assertParsesLatex('\\mathbb{P}\\mathbb{N}\\mathbb{Z}\\mathbb{Q}\\mathbb{R}\\mathbb{C}\\mathbb{H}');
+  });
+
+  test('can parse mathbb error case', function() {
+    assert.throws(function() { assertParsesLatex('\\mathbb + 2'); });
+    assert.throws(function() { assertParsesLatex('\\mathbb{A}'); });
+  });
+
   test('simple exponent', function() {
     assertParsesLatex('x^{n}');
   });
@@ -103,6 +114,27 @@ suite('latex', function() {
     var contents = tree.ends[L].ends[L].join('latex');
     assert.equal(contents, '123');
     assert.equal(tree.join('latex'), '\\left\\lVert 123\\right\\rVert )');
+  });
+
+  test('\\lVert/\\rVert (without whitespace)', function() {
+    var tree = latexMathParser.parse('\\left\\lVert123\\right\\rVert)');
+
+    assert.ok(tree.ends[L] instanceof Bracket);
+    var contents = tree.ends[L].ends[L].join('latex');
+    assert.equal(contents, '123');
+    assert.equal(tree.join('latex'), '\\left\\lVert 123\\right\\rVert )');
+  });
+
+  test('\\langler should not parse', function() {
+    assert.throws(function () {
+      latexMathParser.parse('\\left\\langler123\\right\\rangler');
+    })
+  });
+
+  test('\\lVerte should not parse', function() {
+    assert.throws(function () {
+      latexMathParser.parse('\\left\\lVerte123\\right\\rVerte');
+    })
   });
 
   test('parens with whitespace', function() {
