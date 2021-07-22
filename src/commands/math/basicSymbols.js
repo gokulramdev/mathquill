@@ -883,7 +883,7 @@ var Greater = P(Inequality, function(_, super_) {
     super_.init.call(this, greater, true);
   };
   _.createLeftOf = function(cursor) {
-    if (cursor[L] instanceof BinaryOperator && cursor[L].ctrlSeq === '-') {
+    if (cursor.options.enableRightArrow && cursor[L] instanceof BinaryOperator && cursor[L].ctrlSeq === '-') {
       var l = cursor[L];
       cursor[L] = l[L];
       l.remove();
