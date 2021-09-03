@@ -48,7 +48,6 @@ var TextBlock = P(Node, function(_, super_) {
     return optWhitespace
       .then(string('{')).then(regex(/^[^}]*/)).skip(string('}'))
       .map(function(text) {
-        console.log("Text", text);
         if (text.length === 0) return Fragment();
 
         TextPiece(text).adopt(textBlock, 0, 0);
@@ -167,7 +166,7 @@ var TextBlock = P(Node, function(_, super_) {
     }
     else if (cursor.anticursor.parent === this) {
       // mouse-selecting within this TextBlock, re-insert the anticursor
-      var cursorPosition = cursor[L] && cursor[L].text.length;;
+      var cursorPosition = cursor[L] && cursor[L].text.length;
       if (this.anticursorPosition === cursorPosition) {
         cursor.anticursor = Point.copy(cursor);
       }
@@ -389,7 +388,8 @@ var RootMathCommand = P(MathCommand, function(_, super_) {
 
 var RootTextBlock = P(RootMathBlock, function(_, super_) {
   _.keystroke = function(key) {
-    if (key === 'Spacebar' || key === 'Shift-Spacebar') return;
+    // The math block version of this method intentionally weeds out space characters.
+    // However, as this block is meant to comprise literal text, we aren't doing that here.
     return super_.keystroke.apply(this, arguments);
   };
   _.write = function(cursor, ch) {
