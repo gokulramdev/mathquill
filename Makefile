@@ -53,7 +53,8 @@ SOURCES_BASIC = \
   $(BASE_SOURCES) \
   $(SRC_DIR)/commands/math.js \
   $(SRC_DIR)/commands/math/basicSymbols.js \
-  $(SRC_DIR)/commands/math/commands.js
+  $(SRC_DIR)/commands/math/commands.js \
+  $(SRC_DIR)/commands/text.js
 
 CSS_DIR = $(SRC_DIR)/css
 CSS_MAIN = $(CSS_DIR)/main.less
