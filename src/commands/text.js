@@ -168,7 +168,9 @@ var TextBlock = P(Node, function(_, super_) {
       // mouse-selecting within this TextBlock, re-insert the anticursor
       var cursorPosition = cursor[L] && cursor[L].text.length;
       if (this.anticursorPosition === cursorPosition) {
-        cursor.anticursor = Point.copy(cursor);
+        var anticursor = Point.copy(cursor);
+        anticursor.ancestors = getAnticursorAncestors(anticursor);
+        cursor.anticursor = anticursor;
       }
       else {
         if (this.anticursorPosition < cursorPosition) {
@@ -178,7 +180,9 @@ var TextBlock = P(Node, function(_, super_) {
         else {
           var newTextPc = cursor[R].splitRight(this.anticursorPosition - cursorPosition);
         }
-        cursor.anticursor = Point(this, newTextPc[L], newTextPc);
+        var anticursor = Point(this, newTextPc[L], newTextPc);
+        anticursor.ancestors = getAnticursorAncestors(anticursor);
+        cursor.anticursor = anticursor;
       }
     }
   };
@@ -208,6 +212,16 @@ var TextBlock = P(Node, function(_, super_) {
 
     self.children().disown();
     return textPc.adopt(self, 0, 0);
+  }
+
+  function getAnticursorAncestors(anticursor) {
+    var ancestors = {}; // a map from each ancestor of
+      // the anticursor, to its child that is also an ancestor; in other words,
+      // the anticursor's ancestor chain in reverse order
+    for (var ancestor = anticursor; ancestor.parent; ancestor = ancestor.parent) {
+      ancestors[ancestor.parent.id] = ancestor;
+    }
+    return ancestors;
   }
 
   _.focus = MathBlock.prototype.focus;
