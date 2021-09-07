@@ -71,6 +71,9 @@ var TextBlock = P(Node, function(_, super_) {
     return (
         '<span class="mq-text-mode" mathquill-command-id='+this.id+'>'
       +   this.textContents()
+      .replace(/\s/g, '&nbsp;')
+      .replace(/\</g, '&lt;')
+      .replace(/\>/g, '&gt;')
       + '</span>'
     );
   };
