@@ -34,14 +34,14 @@ BASE_SOURCES = \
   $(SRC_DIR)/publicapi.js \
   $(SRC_DIR)/services/parser.util.js \
   $(SRC_DIR)/services/saneKeyboardEvents.util.js \
-  $(SRC_DIR)/services/aria.js \
   $(SRC_DIR)/services/exportText.js \
   $(SRC_DIR)/services/focusBlur.js \
   $(SRC_DIR)/services/keystroke.js \
   $(SRC_DIR)/services/latex.js \
   $(SRC_DIR)/services/mouse.js \
   $(SRC_DIR)/services/scrollHoriz.js \
-  $(SRC_DIR)/services/textarea.js
+  $(SRC_DIR)/services/textarea.js \
+  $(SRC_DIR)/services/aria.js 
 
 SOURCES_FULL = \
   $(BASE_SOURCES) \

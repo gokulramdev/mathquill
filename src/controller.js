@@ -78,7 +78,7 @@ var Controller = P(function(_) {
         this._ariaAlertTimeout = setTimeout(function() {
           if (this.containerHasFocus()) {
             // Voice the new label, but do not update content mathspeak to prevent double-speech.
-            aria.alert(this.root.mathspeak().trim() + ' ' + ariaPostLabel.trim());
+            this.aria.alert(this.root.mathspeak().trim() + ' ' + ariaPostLabel.trim());
             } else {
             // This mathquill does not have focus, so update its mathspeak.
             this.updateMathspeak();

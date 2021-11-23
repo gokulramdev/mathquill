@@ -145,7 +145,7 @@ var MathCommand = P(MathElement, function(_, super_) {
   _.moveTowards = function(dir, cursor, updown) {
     var updownInto = updown && this[updown+'Into'];
     cursor.insAtDirEnd(-dir, updownInto || this.ends[-dir]);
-    aria.queueDirEndOf(-dir).queue(cursor.parent, true);
+    cursor.controller.aria.queueDirEndOf(-dir).queue(cursor.parent, true);
   };
   _.deleteTowards = function(dir, cursor) {
     if (this.isEmpty()) cursor[dir] = this.remove()[dir];
@@ -363,7 +363,7 @@ var Symbol = P(MathCommand, function(_, super_) {
     cursor.jQ.insDirOf(dir, this.jQ);
     cursor[-dir] = this;
     cursor[dir] = this[dir];
-    aria.queue(this);
+    cursor.controller.aria.queue(this);
   };
   _.deleteTowards = function(dir, cursor) {
     cursor[dir] = this.remove()[dir];
@@ -471,11 +471,11 @@ var MathBlock = P(MathElement, function(_, super_) {
     var updownInto = updown && this.parent[updown+'Into'];
     if (!updownInto && this[dir]) {
       cursor.insAtDirEnd(-dir, this[dir]);
-      aria.queueDirEndOf(-dir).queue(cursor.parent, true);
+      cursor.controller.aria.queueDirEndOf(-dir).queue(cursor.parent, true);
     }
     else {
       cursor.insDirOf(dir, this.parent);
-      aria.queueDirOf(dir).queue(this.parent);
+      cursor.controller.aria.queueDirOf(dir).queue(this.parent);
     }
   };
   _.selectOutOf = function(dir, cursor) {
@@ -518,9 +518,9 @@ var MathBlock = P(MathElement, function(_, super_) {
       cmd.createLeftOf(cursor.show());
       // special-case the slash so that fractions are voiced while typing
       if (ch === '/') {
-        aria.alert('over');
+        cursor.controller.aria.alert('over');
       } else {
-        aria.alert(cmd.mathspeak({ createdLeftOf: cursor }));
+        cursor.controller.aria.alert(cmd.mathspeak({ createdLeftOf: cursor }));
       }
     }
   };

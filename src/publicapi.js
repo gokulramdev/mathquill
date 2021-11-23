@@ -107,6 +107,7 @@ function getInterface(v) {
     _.__mathquillify = function(classNames) {
       var ctrlr = this.__controller, root = ctrlr.root, el = ctrlr.container;
       ctrlr.createTextarea();
+      ctrlr.createAriaElement();
 
       var contents = el.addClass(classNames).contents().detach();
       root.jQ = $('<span class="mq-root-block"/>').appendTo(el);

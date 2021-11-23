@@ -92,11 +92,11 @@ var TextBlock = P(Node, function(_, super_) {
   // the cursor
   _.moveTowards = function(dir, cursor) {
     cursor.insAtDirEnd(-dir, this);
-    aria.queueDirEndOf(-dir).queue(cursor.parent, true);
+    cursor.controller.aria.queueDirEndOf(-dir).queue(cursor.parent, true);
   };
   _.moveOutOf = function(dir, cursor) {
     cursor.insDirOf(dir, this);
-    aria.queueDirOf(dir).queue(this);
+    cursor.controller.aria.queueDirOf(dir).queue(this);
   };
   _.unselectInto = _.moveTowards;
 
@@ -135,7 +135,7 @@ var TextBlock = P(Node, function(_, super_) {
     }
     this.bubble(function (node) { node.reflow(); });
     // TODO needs tests
-    aria.alert(ch);
+    cursor.controller.aria.alert(ch);
   };
   _.writeLatex = function(cursor, latex) {
     if (!cursor[L]) TextPiece(latex).createLeftOf(cursor);
@@ -289,13 +289,13 @@ var TextPiece = P(Node, function(_, super_) {
         deletedChar = this.text[this.text.length - 1];
         this.text = this.text.slice(0, -1);
       }
-      aria.queue(deletedChar);
+      cursor.controller.aria.queue(deletedChar);
     }
     else {
       this.remove();
       this.jQ.remove();
       cursor[dir] = this[dir];
-      aria.queue(this.text);
+      cursor.controller.aria.queue(this.text);
     }
   };
 

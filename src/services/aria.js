@@ -13,14 +13,10 @@
 
 var Aria = P(function(_) {
   _.init = function() {
-    this.jQ = jQuery([]); // empty element
-    // Add the alert DOM element only after the page has loaded.
-    jQuery(document).ready(function() {
-      var el = '.mq-aria-alert';
-      // No matter how many Mathquill instances exist, we only need one alert object to say something.
-      if (!jQuery(el).length) jQuery('body').append("<p aria-live='assertive' aria-atomic='true' class='mq-aria-alert'></p>"); // make this as noisy as possible in hopes that all modern screen reader/browser combinations will speak when triggered later.
-      this.jQ = jQuery(el);
-    }.bind(this));
+    var el = '.mq-aria-alert';
+    // No matter how many Mathquill instances exist, we only need one alert object to say something.
+    if (!jQuery(el).length) jQuery('body').append("<p aria-live='assertive' aria-atomic='true' class='mq-aria-alert'></p>"); // make this as noisy as possible in hopes that all modern screen reader/browser combinations will speak when triggered later.
+    this.jQ = jQuery(el);
     this.items = [];
     this.msg = '';
   };
@@ -76,11 +72,8 @@ var Aria = P(function(_) {
   };
 });
 
-// We only ever need one instance of the ARIA alert object, and it needs to be easily accessible from all modules.
-var aria = Aria();
-
 Controller.open(function(_) {
-  _.aria = aria;
+  _.createAriaElement = function() { _.aria = Aria(); };
   // based on http://www.gh-mathspeak.com/examples/quick-tutorial/
   // and http://www.gh-mathspeak.com/examples/grammar-rules/
   _.exportMathSpeak = function() { return this.root.mathspeak(); };

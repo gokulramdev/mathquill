@@ -32,22 +32,19 @@ CharCmds['\\'] = P(MathCommand, function(_, super_) {
 
       if (ch.match(/[a-z]/i)) {
         VanillaSymbol(ch).createLeftOf(cursor);
-        // TODO needs tests
-        aria.alert(ch);
+        cursor.controller.aria.alert(ch);
       }
       else {
         var cmd = this.parent.renderCommand(cursor);
-        // TODO needs tests
-        aria.queue(cmd.mathspeak({ createdLeftOf: cursor }));
+        cursor.controller.aria.queue(cmd.mathspeak({ createdLeftOf: cursor }));
         if (ch !== '\\' || !this.isEmpty()) cursor.parent.write(cursor, ch);
-        else aria.alert();
+        else cursor.controller.aria.alert();
       }
     };
     this.ends[L].keystroke = function(key, e, ctrlr) {
       if (key === 'Tab' || key === 'Enter' || key === 'Spacebar') {
         var cmd = this.parent.renderCommand(ctrlr.cursor);
-        // TODO needs tests
-        aria.alert(cmd.mathspeak({ createdLeftOf: ctrlr.cursor }));
+        cursor.controller.aria.alert(cmd.mathspeak({ createdLeftOf: ctrlr.cursor }));
         e.preventDefault();
         return;
       }
