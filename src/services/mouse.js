@@ -41,7 +41,11 @@ Controller.open(function(_) {
       function docmousemove(e) {
         if (!cursor.anticursor) cursor.startSelection();
         ctrlr.seek(target, e.pageX, e.pageY).cursor.select();
-        if(cursor.selection) ctrlr.aria.clear().queue(cursor.selection.join('mathspeak') + ' selected').alert();
+        if(cursor.selection) {
+          ctrlr.ariaClear();
+          ctrlr.ariaQueue(cursor.selection.join('mathspeak') + ' selected');
+          ctrlr.ariaAlert();
+        }
         target = undefined;
       }
       // outside rootjQ, the MathQuill node corresponding to the target (if any)
@@ -57,7 +61,8 @@ Controller.open(function(_) {
       function updateCursor () {
         if (ctrlr.editable) {
           cursor.show();
-          ctrlr.aria.queue(cursor.parent).alert();
+          ctrlr.ariaQueue(cursor.parent);
+          ctrlr.ariaAlert();
         }
         else {
           textareaSpan.detach();

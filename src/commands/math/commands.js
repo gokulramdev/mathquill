@@ -271,19 +271,21 @@ var SupSub = P(MathCommand, function(_, super_) {
   Options.p.charsThatBreakOutOfSupSub = '';
   _.finalizeTree = function() {
     this.ends[L].write = function(cursor, ch) {
+      var ctrlr = cursor.controller;
       if (cursor.options.autoSubscriptNumerals && this === this.parent.sub) {
         if (ch === '_') return;
         var cmd = this.chToCmd(ch, cursor.options);
         if (cmd instanceof Symbol) cursor.deleteSelection();
         else cursor.clearSelection().insRightOf(this.parent);
         cmd.createLeftOf(cursor.show());
-        cursor.controller.aria.queue('Baseline').alert(cmd.mathspeak({ createdLeftOf: cursor }));
+        ctrlr.ariaQueue('Baseline');
+        ctrlr.ariaAlert(cmd.mathspeak({ createdLeftOf: cursor }));
         return;
       }
       if (cursor[L] && !cursor[R] && !cursor.selection
           && cursor.options.charsThatBreakOutOfSupSub.indexOf(ch) > -1) {
         cursor.insRightOf(this.parent);
-        cursor.controller.aria.queue('Baseline');
+        ctrlr.ariaQueue('Baseline');
       }
       MathBlock.p.write.apply(this, arguments);
     };

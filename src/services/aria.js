@@ -11,16 +11,16 @@
  * Chrome 54+ on Android works reliably with Talkback.
  ****************************************/
 
-var Aria = P(function(_) {
-  _.init = function(ctrlr) {
-    var $el = jQuery("<span aria-live='assertive' aria-atomic='true' class='mq-aria-alert'></span>");
-    ctrlr.textareaSpan.append($el);
-    this.jQ = $el;
-    this.items = [];
-    this.msg = '';
+Controller.open(function(_) {
+  _.createAriaElement = function() {
+    var ctrlr = this;
+    ctrlr.ariaElement = jQuery("<span aria-live='assertive' aria-atomic='true' class='mq-aria-alert'></span>");
+    ctrlr.textareaSpan.append(ctrlr.ariaElement);
+    this.ariaItems = [];
+    this.ariaMsg = '';
   };
 
-  _.queue = function(item, shouldDescribe) {
+  _.ariaQueue = function(item, shouldDescribe) {
     var output = '';
     if (item instanceof Node) {
       // Some constructs include verbal shorthand (such as simple fractions and exponents).
@@ -44,37 +44,32 @@ var Aria = P(function(_) {
     } else {
       output = item;
     }
-    this.items.push(output);
-    return this;
-  };
-  _.queueDirOf = function(dir) {
-    prayDirection(dir);
-    return this.queue(dir === L ? 'before' : 'after');
-  };
-  _.queueDirEndOf = function(dir) {
-    prayDirection(dir);
-    return this.queue(dir === L ? 'beginning of' : 'end of');
+    this.ariaItems.push(output);
   };
 
-  _.alert = function(t) {
-    if (t) this.queue(t);
-    if (this.items.length) {
-      this.msg = this.items.join(' ').replace(/ +(?= )/g,'').trim();
-      this.jQ.empty().text(this.msg);
+  _.ariaQueueDirOf = function(dir) {
+    prayDirection(dir);
+    this.ariaQueue(dir === L ? 'before' : 'after');
+  };
+
+  _.ariaQueueDirEndOf = function(dir) {
+    prayDirection(dir);
+    this.ariaQueue(dir === L ? 'beginning of' : 'end of');
+  };
+
+  _.ariaAlert = function(t) {
+    if (t) this.ariaQueue(t);
+    if (this.ariaItems.length) {
+      this.ariaMsg = this.ariaItems.join(' ').replace(/ +(?= )/g,'').trim();
+      this.ariaElement.empty().text(this.ariaMsg);
     }
-    return this.clear();
+    this.ariaClear();
   };
 
-  _.clear = function() {
-    this.items.length = 0;
-    return this;
+  _.ariaClear = function() {
+    this.ariaItems.length = 0;
   };
-});
 
-Controller.open(function(_) {
-  _.createAriaElement = function() {
-    _.aria = Aria(this);
-  };
   // based on http://www.gh-mathspeak.com/examples/quick-tutorial/
   // and http://www.gh-mathspeak.com/examples/grammar-rules/
   _.exportMathSpeak = function() { return this.root.mathspeak(); };

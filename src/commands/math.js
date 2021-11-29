@@ -143,9 +143,11 @@ var MathCommand = P(MathElement, function(_, super_) {
   // and selection of the MathQuill tree, these all take in a direction and
   // the cursor
   _.moveTowards = function(dir, cursor, updown) {
+    var ctrlr = cursor.controller;
     var updownInto = updown && this[updown+'Into'];
     cursor.insAtDirEnd(-dir, updownInto || this.ends[-dir]);
-    cursor.controller.aria.queueDirEndOf(-dir).queue(cursor.parent, true);
+    ctrlr.ariaQueueDirEndOf(-dir);
+    ctrlr.ariaQueue(cursor.parent, true);
   };
   _.deleteTowards = function(dir, cursor) {
     if (this.isEmpty()) cursor[dir] = this.remove()[dir];
@@ -363,7 +365,7 @@ var Symbol = P(MathCommand, function(_, super_) {
     cursor.jQ.insDirOf(dir, this.jQ);
     cursor[-dir] = this;
     cursor[dir] = this[dir];
-    cursor.controller.aria.queue(this);
+    cursor.controller.ariaQueue(this);
   };
   _.deleteTowards = function(dir, cursor) {
     cursor[dir] = this.remove()[dir];
@@ -468,14 +470,17 @@ var MathBlock = P(MathElement, function(_, super_) {
   // and selection of the MathQuill tree, these all take in a direction and
   // the cursor
   _.moveOutOf = function(dir, cursor, updown) {
+    var ctrlr = cursor.controller;
     var updownInto = updown && this.parent[updown+'Into'];
     if (!updownInto && this[dir]) {
       cursor.insAtDirEnd(-dir, this[dir]);
-      cursor.controller.aria.queueDirEndOf(-dir).queue(cursor.parent, true);
+      ctrlr.ariaQueueDirEndOf(-dir);
+      ctrlr.ariaQueue(cursor.parent, true);
     }
     else {
       cursor.insDirOf(dir, this.parent);
-      cursor.controller.aria.queueDirOf(dir).queue(this.parent);
+      ctrlr.ariaQueueDirOf(dir);
+      ctrlr.ariaQueue(this.parent);
     }
   };
   _.selectOutOf = function(dir, cursor) {
@@ -518,9 +523,9 @@ var MathBlock = P(MathElement, function(_, super_) {
       cmd.createLeftOf(cursor.show());
       // special-case the slash so that fractions are voiced while typing
       if (ch === '/') {
-        cursor.controller.aria.alert('over');
+        cursor.controller.ariaAlert('over');
       } else {
-        cursor.controller.aria.alert(cmd.mathspeak({ createdLeftOf: cursor }));
+        cursor.controller.ariaAlert(cmd.mathspeak({ createdLeftOf: cursor }));
       }
     }
   };

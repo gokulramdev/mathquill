@@ -91,12 +91,16 @@ var TextBlock = P(Node, function(_, super_) {
   // and selection of the MathQuill tree, these all take in a direction and
   // the cursor
   _.moveTowards = function(dir, cursor) {
+    var ctrlr = cursor.controller;
     cursor.insAtDirEnd(-dir, this);
-    cursor.controller.aria.queueDirEndOf(-dir).queue(cursor.parent, true);
+    ctrlr.ariaQueueDirEndOf(-dir);
+    ctrlr.ariaQueue(cursor.parent, true);
   };
   _.moveOutOf = function(dir, cursor) {
+    var ctrlr = cursor.controller;
     cursor.insDirOf(dir, this);
-    cursor.controller.aria.queueDirOf(dir).queue(this);
+    ctrlr.ariaQueueDirOf(dir);
+    ctrlr.ariaQueue(this);
   };
   _.unselectInto = _.moveTowards;
 
@@ -134,8 +138,7 @@ var TextBlock = P(Node, function(_, super_) {
       super_.createLeftOf.call(leftBlock, cursor); // micro-optimization, not for correctness
     }
     this.bubble(function (node) { node.reflow(); });
-    // TODO needs tests
-    cursor.controller.aria.alert(ch);
+    cursor.controller.ariaAlert(ch);
   };
   _.writeLatex = function(cursor, latex) {
     if (!cursor[L]) TextPiece(latex).createLeftOf(cursor);
@@ -275,6 +278,7 @@ var TextPiece = P(Node, function(_, super_) {
   _.latex = function() { return this.text; };
 
   _.deleteTowards = function(dir, cursor) {
+    var ctrlr = cursor.controller;
     if (this.text.length > 1) {
       var deletedChar;
       if (dir === R) {
@@ -289,13 +293,12 @@ var TextPiece = P(Node, function(_, super_) {
         deletedChar = this.text[this.text.length - 1];
         this.text = this.text.slice(0, -1);
       }
-      cursor.controller.aria.queue(deletedChar);
-    }
-    else {
+      ctrlr.ariaQueue(deletedChar);
+    } else {
       this.remove();
       this.jQ.remove();
       cursor[dir] = this[dir];
-      cursor.controller.aria.queue(this.text);
+      ctrlr.ariaQueue(this.text);
     }
   };
 

@@ -5,7 +5,7 @@ suite('aria', function() {
   });
 
   function assertAriaEqual(alertText) {
-    assert.equal(alertText, mathField.__controller.aria.msg);
+    assert.equal(alertText, mathField.__controller.ariaMsg);
   }
 
   test('typing and backspacing over simple expression', function() {
