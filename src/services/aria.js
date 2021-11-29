@@ -13,11 +13,10 @@
 
 Controller.open(function(_) {
   _.createAriaElement = function() {
-    var ctrlr = this;
-    ctrlr.ariaElement = jQuery("<span aria-live='assertive' aria-atomic='true' class='mq-aria-alert'></span>");
-    ctrlr.textareaSpan.append(ctrlr.ariaElement);
-    this.ariaItems = [];
-    this.ariaMsg = '';
+    _.ariaElement = jQuery("<span aria-live='assertive' aria-atomic='true' class='mq-aria-alert'></span>");
+    this.container.append(this.ariaElement);
+    _.ariaItems = [];
+    _.ariaMsg = '';
   };
 
   _.ariaQueue = function(item, shouldDescribe) {

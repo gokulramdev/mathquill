@@ -107,7 +107,6 @@ function getInterface(v) {
     _.__mathquillify = function(classNames) {
       var ctrlr = this.__controller, root = ctrlr.root, el = ctrlr.container;
       ctrlr.createTextarea();
-      ctrlr.createAriaElement();
 
       var contents = el.addClass(classNames).contents().detach();
       root.jQ = $('<span class="mq-root-block"/>').appendTo(el);
@@ -119,6 +118,8 @@ function getInterface(v) {
         .removeClass('mq-editable-field mq-math-mode mq-text-mode')
         .append(contents);
       };
+
+      ctrlr.createAriaElement();
     };
     _.config = function(opts) { config(this.__options, opts); return this; };
     _.el = function() { return this.__controller.container[0]; };
