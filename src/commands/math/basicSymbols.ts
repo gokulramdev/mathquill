@@ -632,10 +632,10 @@ LatexCmds.f = class extends Letter {
     super(letter);
 
     this.letter = letter;
-    this.htmlTemplate = '<var class="mq-f">f</var>';
+    this.htmlTemplate = '<var class="mq-g">f</var>';
   };
   italicize (bool:boolean) {
-    this.jQ.html('f').toggleClass('mq-f', bool);
+    this.jQ.html('f').toggleClass('mq-g', bool);
     return super.italicize(bool);
   };
 };
