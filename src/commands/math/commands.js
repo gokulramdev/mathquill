@@ -83,11 +83,11 @@ var SVG_SYMBOLS = {
 var Style = P(MathCommand, function(_, super_) {
   _.init = function(ctrlSeq, tagName, attrs, ariaLabel, opts) {
     super_.init.call(this, ctrlSeq, '<'+tagName+' '+attrs+'>&0</'+tagName+'>');
-    _.ariaLabel = ariaLabel || ctrlSeq.replace(/^\\/, '');
-    _.mathspeakTemplate = ['Start' + _.ariaLabel + ',', 'End' + _.ariaLabel];
+    this.ariaLabel = ariaLabel || ctrlSeq.replace(/^\\/, '');
+    this.mathspeakTemplate = ['Start' + this.ariaLabel + ',', 'End' + this.ariaLabel];
     // In most cases, mathspeak should announce the start and end of style blocks.
     // There is one exception currently (mathrm).
-    _.shouldNotSpeakDelimiters = opts && opts.shouldNotSpeakDelimiters;
+    this.shouldNotSpeakDelimiters = opts && opts.shouldNotSpeakDelimiters;
   };
   _.mathspeak = function(opts) {
     if (
@@ -144,8 +144,8 @@ var TextColor = LatexCmds.textcolor = P(MathCommand, function(_, super_) {
     this.color = color;
     this.htmlTemplate =
       '<span class="mq-textcolor" style="color:' + color + '">&0</span>';
-    _.ariaLabel = color.replace(/^\\/, '');
-    _.mathspeakTemplate = ['Start ' + _.ariaLabel + ',', 'End ' + _.ariaLabel];
+    this.ariaLabel = color.replace(/^\\/, '');
+    this.mathspeakTemplate = ['Start ' + this.ariaLabel + ',', 'End ' + this.ariaLabel];
   };
   _.latex = function() {
     return '\\textcolor{' + this.color + '}{' + this.blocks[0].latex() + '}';
@@ -461,7 +461,7 @@ LatexCmds['^'] = P(SupSub, function(_, super_) {
 
 var SummationNotation = P(MathCommand, function(_, super_) {
   _.init = function(ch, html, ariaLabel) {
-    _.ariaLabel = ariaLabel || ctrlSeq.replace(/^\\/, '');
+    this.ariaLabel = ariaLabel || ctrlSeq.replace(/^\\/, '');
     var htmlTemplate =
       '<span class="mq-large-operator mq-non-leaf">'
     +   '<span class="mq-to"><span>&1</span></span>'
