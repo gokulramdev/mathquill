@@ -260,9 +260,13 @@ function getInterface(v:number) {
       return this;
     };
     select () {
+      // TODO, refactor to call a selectAll method on controller to
+      // share with keyboard shortcuts
       var ctrlr = this.__controller;
       ctrlr.notify('move').cursor.insAtRightEnd(ctrlr.root);
-      while (ctrlr.cursor[L]) ctrlr.selectLeft();
+      ctrlr.startSelection();
+      while (ctrlr.cursor[L]) ctrlr.selectDirIncremental(L);
+      ctrlr.finishSelection();
       return this;
     };
     clearSelection () {

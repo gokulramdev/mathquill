@@ -46,16 +46,20 @@ var SELECTION_OPEN = false;
 
     // Shift-End -> select to the end of the current block.
     case 'Shift-End':
+      ctrlr.startSelection();
       while (cursor[R]) {
-        ctrlr.selectDir(R);
+        ctrlr.selectDirIncremental(R);
       }
+      ctrlr.finishSelection();
       break;
 
     // Ctrl-Shift-End -> select all the way to the end of the root block.
     case 'Ctrl-Shift-End':
+      ctrlr.startSelection();
       while (cursor[R] || cursor.parent !== ctrlr.root) {
-        ctrlr.selectDir(R);
+        ctrlr.selectDirIncremental(R);
       }
+      ctrlr.finishSelection();
       break;
 
     // Home -> move to the start of the current block.
@@ -72,16 +76,20 @@ var SELECTION_OPEN = false;
 
     // Shift-Home -> select to the start of the current block.
     case 'Shift-Home':
+      ctrlr.startSelection();
       while (cursor[L]) {
-        ctrlr.selectDir(L);
+        ctrlr.selectDirIncremental(L);
       }
+      ctrlr.finishSelection();
       break;
 
     // Ctrl-Shift-Home -> select all the way to the start of the root block.
     case 'Ctrl-Shift-Home':
+      ctrlr.startSelection();
       while (cursor[L] || cursor.parent !== ctrlr.root) {
-        ctrlr.selectDir(L);
+        ctrlr.selectDirIncremental(L);
       }
+      ctrlr.finishSelection()
       break;
 
     case 'Left': ctrlr.moveLeft(); break;
@@ -96,20 +104,24 @@ var SELECTION_OPEN = false;
     case 'Down': ctrlr.moveDown(); break;
 
     case 'Shift-Up':
+      ctrlr.startSelection();
       if (cursor[L]) {
-        while (cursor[L]) ctrlr.selectDir(L);
+        while (cursor[L]) ctrlr.selectDirIncremental(L);
       } else {
-        ctrlr.selectDir(L);
+        ctrlr.selectDirIncremental(L);
       }
+      ctrlr.finishSelection();
       break;
 
     case 'Shift-Down':
+      ctrlr.startSelection();
       if (cursor[R]) {
-        while (cursor[R]) ctrlr.selectDir(R);
+        while (cursor[R]) ctrlr.selectDirIncremental(R);
       }
       else {
-        ctrlr.selectDir(R);
+        ctrlr.selectDirIncremental(R);
       }
+      ctrlr.finishSelection();
       break;
 
     case 'Ctrl-Up': break;
@@ -128,7 +140,9 @@ var SELECTION_OPEN = false;
     case 'Meta-A':
     case 'Ctrl-A':
       ctrlr.notify('move').cursor.insAtRightEnd(ctrlr.root);
-      while (cursor[L]) ctrlr.selectDir(L);
+      ctrlr.startSelection()
+      while (cursor[L]) ctrlr.selectDirIncremental(L);
+      ctrlr.finishSelection()
       break;
 
     // These remaining hotkeys are only of benefit to people running screen readers.
@@ -386,7 +400,7 @@ class Controller_keystroke extends Controller_focusBlur {
   }
 
   /**
-   * Note: must be paired with startSelect and finishSelect
+   * Note: must be paired with startSelection and finishSelection
    */
   selectDirIncremental(dir:Direction) {
     pray("A selection is open", SELECTION_OPEN);
