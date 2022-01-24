@@ -135,10 +135,7 @@ var SELECTION_OPEN = false;
 
     case 'Meta-A':
     case 'Ctrl-A':
-      ctrlr.notify('move').cursor.insAtRightEnd(ctrlr.root);
-      ctrlr.withIncrementalSelection((selectDir) => {
-        while (cursor[L]) selectDir(L);
-      });
+      ctrlr.selectAll();
       break;
 
     // These remaining hotkeys are only of benefit to people running screen readers.
@@ -469,4 +466,12 @@ class Controller_keystroke extends Controller_focusBlur {
   };
   selectLeft () { return this.selectDir(L); };
   selectRight () { return this.selectDir(R); };
+  selectAll() {
+    this.notify('move');
+    const cursor = this.cursor;
+    cursor.insAtRightEnd(this.root);
+    this.withIncrementalSelection((selectDir) => {
+      while (cursor[L]) selectDir(L);
+    });
+  }
 };
