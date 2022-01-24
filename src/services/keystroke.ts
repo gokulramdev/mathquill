@@ -3,7 +3,7 @@
  * interaction with the typist.
  ****************************************/
 
-var IN_SELECT_DIR = false;
+var SELECTION_OPEN = false;
 
  class MQNode extends NodeBase {
   keystroke (key:string, e:KeyboardEvent, ctrlr:Controller) {
@@ -378,7 +378,10 @@ class Controller_keystroke extends Controller_focusBlur {
   backspace () { return this.deleteDir(L); };
   deleteForward () { return this.deleteDir(R); };
 
-  startSelect() {
+  startSelection() {
+    // TODO, remove this
+    pray("Multiple selections can't be simultaneously open", !SELECTION_OPEN);
+    SELECTION_OPEN = true;
     this.notify('select');
   }
 
@@ -386,6 +389,9 @@ class Controller_keystroke extends Controller_focusBlur {
    * Note: must be paired with startSelect and finishSelect
    */
   selectDirIncremental(dir:Direction) {
+    pray("A selection is open", SELECTION_OPEN);
+    SELECTION_OPEN = true;
+
     var cursor = this.cursor, seln = cursor.selection;
     prayDirection(dir);
 
@@ -404,7 +410,8 @@ class Controller_keystroke extends Controller_focusBlur {
     else cursor.parent.selectOutOf(dir, cursor);
   }
 
-  finishSelect() {
+  finishSelection() {
+    pray("A selection is open", SELECTION_OPEN);
     var cursor = this.cursor;
     cursor.clearSelection();
     cursor.select() || cursor.show();
@@ -412,18 +419,13 @@ class Controller_keystroke extends Controller_focusBlur {
     if (selection) {
       cursor.controller.aria.clear().queue(selection.join('mathspeak', ' ').trim() + ' selected'); // clearing first because selection fires several times, and we don't want repeated speech.
     }
+    SELECTION_OPEN = false;
   }
 
   selectDir (dir:Direction) {
-    // TODO, remove this
-    pray('selectDir is not called recursively', !IN_SELECT_DIR);
-    IN_SELECT_DIR = true;
-
-    this.startSelect();
+    this.startSelection();
     this.selectDirIncremental(dir);
-    this.finishSelect();
-
-    IN_SELECT_DIR = false;
+    this.finishSelection();
   };
   selectLeft () { return this.selectDir(L); };
   selectRight () { return this.selectDir(R); };
