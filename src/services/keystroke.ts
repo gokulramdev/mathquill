@@ -400,6 +400,8 @@ class Controller_keystroke extends Controller_focusBlur {
 
     SELECTION_OPEN = true;
     this.notify('select');
+    var cursor = this.cursor;
+    if (!cursor.anticursor) cursor.startSelection();
   }
 
   /**
@@ -411,8 +413,6 @@ class Controller_keystroke extends Controller_focusBlur {
 
     var cursor = this.cursor, seln = cursor.selection;
     prayDirection(dir);
-
-    if (!cursor.anticursor) cursor.startSelection();
 
     var node = cursor[dir];
     if (node) {

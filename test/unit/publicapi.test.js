@@ -97,7 +97,8 @@ suite('Public API', function() {
     test('select an empty mq', function() {
       assert.ok(!mq.__controller.cursor.selection);
       mq.select();
-      assert.equal(mq.__controller.cursor.selection.join('latex'), '');
+      // select on an empty mq is a noop
+      assert.ok(!mq.__controller.cursor.selection);
     });
 
     test('latex while there\'s a selection', function() {
