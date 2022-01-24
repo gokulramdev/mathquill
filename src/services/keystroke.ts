@@ -2,7 +2,10 @@
  * Deals with the browser DOM events from
  * interaction with the typist.
  ****************************************/
- class MQNode extends NodeBase {  
+
+var IN_SELECT_DIR = false;
+
+ class MQNode extends NodeBase {
   keystroke (key:string, e:KeyboardEvent, ctrlr:Controller) {
     var cursor = ctrlr.cursor;
 
@@ -376,6 +379,10 @@ class Controller_keystroke extends Controller_focusBlur {
   deleteForward () { return this.deleteDir(R); };
 
   selectDir (dir:Direction) {
+    // TODO, remove this
+    pray('selectDir is not called recursively', !IN_SELECT_DIR);
+    IN_SELECT_DIR = true;
+
     var cursor = this.notify('select').cursor, seln = cursor.selection;
     prayDirection(dir);
 
@@ -399,6 +406,7 @@ class Controller_keystroke extends Controller_focusBlur {
     if (selection) {
       cursor.controller.aria.clear().queue(selection.join('mathspeak', ' ').trim() + ' selected'); // clearing first because selection fires several times, and we don't want repeated speech.
     }
+    IN_SELECT_DIR = false;
   };
   selectLeft () { return this.selectDir(L); };
   selectRight () { return this.selectDir(R); };
