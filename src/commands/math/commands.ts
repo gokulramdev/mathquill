@@ -83,7 +83,7 @@ var SVG_SYMBOLS = {
 
 class Style extends MathCommand {
   shouldNotSpeakDelimiters:boolean | undefined;
-  
+
   constructor (ctrlSeq:string, tagName:string, attrs:string, ariaLabel?:string, opts?:{shouldNotSpeakDelimiters: boolean}) {
     super(ctrlSeq, '<'+tagName+' '+attrs+'>&0</'+tagName+'>');
     this.ariaLabel = ariaLabel || ctrlSeq.replace(/^\\/, '');
@@ -143,7 +143,7 @@ LatexCmds.dot = () => {
 // [W3C spec]: http://dev.w3.org/csswg/css3-color/#colorunits
 LatexCmds.textcolor = class extends MathCommand {
   color:string | undefined;
-  
+
   setColor (color:string) {
     this.color = color;
     this.htmlTemplate =
@@ -218,7 +218,7 @@ function getCtrlSeqsFromBlock(block:NodeRef):string {
 
   var children = block.children();
   if (!children || !children.ends[L]) return '';
-  
+
   var chars = '';
   for (var sibling:NodeRef | undefined = children.ends[L]; sibling && sibling[R] !== undefined; sibling = sibling[R]) {
     if (sibling.ctrlSeq !== undefined) chars += sibling.ctrlSeq;
@@ -348,16 +348,16 @@ class SupSub extends MathCommand {
     if (this.supsub === 'sub') {
       this.sup = this.upInto = (this.sub as MQNode).upOutOf = block;
       block.adopt(this, (this.sub  as MQNode), 0).downOutOf = this.sub;
-      block.jQ = $('<span class="mq-sup"/>').append(block.jQ.children()).prependTo(this.jQ);
+      block.jQ = $(parseHTML('<span class="mq-sup"/>')).append(block.jQ.children()).prependTo(this.jQ);
       NodeBase.linkElementByBlockNode(block.jQ[0], block);
     }
     else {
       this.sub = this.downInto = (this.sup as MQNode).downOutOf = block;
       block.adopt(this, 0, (this.sup as MQNode)).upOutOf = this.sup;
-      block.jQ = $('<span class="mq-sub"></span>').append(block.jQ.children())
+      block.jQ = $(parseHTML('<span class="mq-sub"></span>')).append(block.jQ.children())
         .appendTo(this.jQ.removeClass('mq-sup-only'));
       NodeBase.linkElementByBlockNode(block.jQ[0], block);
-      this.jQ.append('<span style="display:inline-block;width:0">&#8203;</span>');
+      this.jQ.append(parseHTML('<span style="display:inline-block;width:0">&#8203;</span>'));
     }
 
 
@@ -401,19 +401,19 @@ function insLeftOfMeUnlessAtEnd(this:MQNode, cursor:Cursor) {
 
 class SubscriptCommand extends SupSub {
   supsub = 'sub' as const;
-  
+
   htmlTemplate =
       '<span class="mq-supsub mq-non-leaf">'
     +   '<span class="mq-sub">&0</span>'
     +   '<span style="display:inline-block;width:0">&#8203;</span>'
     + '</span>'
-  
+
   textTemplate = [ '_' ];
-  
+
   mathspeakTemplate = [ 'Subscript,', ', Baseline'];
-  
+
   ariaLabel = 'subscript';
-  
+
   finalizeTree () {
     this.downInto = this.sub = this.ends[L] as MathBlock;
     this.sub.upOutOf = insLeftOfMeUnlessAtEnd;
@@ -489,7 +489,7 @@ LatexCmds['^'] = class SuperscriptCommand extends SupSub {
 };
 
 class SummationNotation extends MathCommand {
-  
+
   constructor (ch:string, html:string, ariaLabel?:string) {
     super();
 
@@ -586,7 +586,7 @@ LatexCmds.integral = class extends SummationNotation {
     this.ariaLabel = 'integral';
     this.htmlTemplate = htmlTemplate;
   };
-  
+
   createLeftOf (cursor:Cursor) {
     // FIXME: refactor rather than overriding
     MathCommand.prototype.createLeftOf.call(this, cursor);

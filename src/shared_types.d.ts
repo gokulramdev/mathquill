@@ -58,9 +58,9 @@ type CharCmds = Record<string,LatexCmd>
 declare var MQ1:any;
 declare var validateAutoCommandsOption:any;
 
-type JQSelector = $ | HTMLElement | string | null | Window | NodeListOf<ChildNode> | HTMLElement[] | EventTarget;
+type JQSelector = $ | HTMLElement | null | Window | NodeListOf<ChildNode> | HTMLElement[] | EventTarget;
 interface $ {
-    (selector?:JQSelector):$;
+    (selector?: JQSelector):$;
     fn: any;
     /** Insert this collection either just before or just after `jQ`, according to the direction specified by `dir`. */
     insDirOf(dir:Direction, jQ:$):$,

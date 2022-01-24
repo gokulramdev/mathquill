@@ -32,7 +32,8 @@ class Controller_mouse extends Controller_latex {
     //drag-to-select event handling
     this.container.bind('mousedown.mathquill', function(_e:Event) {
       var e = _e as MouseEvent;
-      var rootjQ = $(e.target).closest('.mq-root-block');
+      const eventTarget = e.target instanceof HTMLElement ? e.target : null;
+      var rootjQ = $(eventTarget?.closest('.mq-root-block'));
       var root = (NodeBase.getNodeOfElement(rootjQ[0]) || NodeBase.getNodeOfElement(ultimateRootjQ[0])) as ControllerRoot;
       var ctrlr = root.controller, cursor = ctrlr.cursor, blink = cursor.blink;
       var textareaSpan = ctrlr.getTextareaSpanOrThrow();
@@ -115,7 +116,7 @@ class Controller_mouse extends Controller_latex {
       // mouseup on page outside field, but even outside page, except iframes: https://github.com/mathquill/mathquill/commit/8c50028afcffcace655d8ae2049f6e02482346c5#commitcomment-6175800
     });
   }
-  
+
   seek ($target:$, pageX:number, _pageY:number) {
     var cursor = this.notify('select').cursor;
     var node;

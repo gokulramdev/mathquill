@@ -3,8 +3,8 @@
  * (as owned by the Controller)
  ********************************************/
 Options.prototype.substituteTextarea = function() {
-  return $('<textarea autocapitalize=off autocomplete=off autocorrect=off ' +
-             'spellcheck=false x-palm-disable-ste-all=true/>')[0];
+  return parseHTML('<textarea autocapitalize=off autocomplete=off autocorrect=off ' +
+             'spellcheck=false x-palm-disable-ste-all=true/>')[0] as HTMLElement;
 };
 Options.prototype.substituteKeyboardEvents = saneKeyboardEvents;
 
@@ -12,7 +12,7 @@ class Controller extends Controller_scrollHoriz {
   selectFn: (text:string) => void;
 
   createTextarea () {
-    var textareaSpan = this.textareaSpan = $('<span class="mq-textarea"></span>'),
+    var textareaSpan = this.textareaSpan = $(parseHTML('<span class="mq-textarea"></span>')),
       textarea = this.options.substituteTextarea();
     if (!textarea.nodeType) {
       throw 'substituteTextarea() must return a DOM element, got ' + textarea;
@@ -58,7 +58,7 @@ class Controller extends Controller_scrollHoriz {
 
     this.container.prepend(jQuery('<span aria-hidden="true" class="mq-selectable">')
       .text('$'+ctrlr.exportLatex()+'$'));
-    this.mathspeakSpan = $('<span class="mq-mathspeak"></span>');
+    this.mathspeakSpan = $(parseHTML('<span class="mq-mathspeak"></span>'));
     this.container.prepend(this.mathspeakSpan);
     ctrlr.blurred = true;
     textarea.bind('cut paste', false);
