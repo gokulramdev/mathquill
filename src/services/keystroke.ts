@@ -378,12 +378,15 @@ class Controller_keystroke extends Controller_focusBlur {
   backspace () { return this.deleteDir(L); };
   deleteForward () { return this.deleteDir(R); };
 
-  selectDir (dir:Direction) {
-    // TODO, remove this
-    pray('selectDir is not called recursively', !IN_SELECT_DIR);
-    IN_SELECT_DIR = true;
+  startSelect() {
+    this.notify('select');
+  }
 
-    var cursor = this.notify('select').cursor, seln = cursor.selection;
+  /**
+   * Note: must be paired with startSelect and finishSelect
+   */
+  selectDirIncremental(dir:Direction) {
+    var cursor = this.cursor, seln = cursor.selection;
     prayDirection(dir);
 
     if (!cursor.anticursor) cursor.startSelection();
@@ -399,13 +402,27 @@ class Controller_keystroke extends Controller_focusBlur {
       else node.selectTowards(dir, cursor);
     }
     else cursor.parent.selectOutOf(dir, cursor);
+  }
 
+  finishSelect() {
+    var cursor = this.cursor;
     cursor.clearSelection();
     cursor.select() || cursor.show();
     var selection = cursor.selection;
     if (selection) {
       cursor.controller.aria.clear().queue(selection.join('mathspeak', ' ').trim() + ' selected'); // clearing first because selection fires several times, and we don't want repeated speech.
     }
+  }
+
+  selectDir (dir:Direction) {
+    // TODO, remove this
+    pray('selectDir is not called recursively', !IN_SELECT_DIR);
+    IN_SELECT_DIR = true;
+
+    this.startSelect();
+    this.selectDirIncremental(dir);
+    this.finishSelect();
+
     IN_SELECT_DIR = false;
   };
   selectLeft () { return this.selectDir(L); };
