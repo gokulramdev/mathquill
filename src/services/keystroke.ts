@@ -394,7 +394,10 @@ class Controller_keystroke extends Controller_focusBlur {
 
   startSelection() {
     // TODO, remove this
-    pray("Multiple selections can't be simultaneously open", !SELECTION_OPEN);
+    if (SELECTION_OPEN) {
+      pray("Multiple selections can't be simultaneously open", !SELECTION_OPEN);
+    }
+
     SELECTION_OPEN = true;
     this.notify('select');
   }
