@@ -393,10 +393,7 @@ class Controller_keystroke extends Controller_focusBlur {
   deleteForward () { return this.deleteDir(R); };
 
   startSelection() {
-    // TODO, remove this
-    if (SELECTION_OPEN) {
-      pray("Multiple selections can't be simultaneously open", !SELECTION_OPEN);
-    }
+    pray("Multiple selections can't be simultaneously open", !SELECTION_OPEN);
 
     SELECTION_OPEN = true;
     this.notify('select');
