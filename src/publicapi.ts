@@ -264,9 +264,9 @@ function getInterface(v:number) {
       // share with keyboard shortcuts
       var ctrlr = this.__controller;
       ctrlr.notify('move').cursor.insAtRightEnd(ctrlr.root);
-      ctrlr.startSelection();
-      while (ctrlr.cursor[L]) ctrlr.selectDirIncremental(L);
-      ctrlr.finishSelection();
+      ctrlr.withIncrementalSelection((selectDir)=>{
+        while (ctrlr.cursor[L]) selectDir(L);
+      });
       return this;
     };
     clearSelection () {

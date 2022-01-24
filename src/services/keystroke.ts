@@ -46,20 +46,18 @@ var SELECTION_OPEN = false;
 
     // Shift-End -> select to the end of the current block.
     case 'Shift-End':
-      ctrlr.startSelection();
-      while (cursor[R]) {
-        ctrlr.selectDirIncremental(R);
-      }
-      ctrlr.finishSelection();
+      ctrlr.withIncrementalSelection((selectDir) => {
+        while (cursor[R]) selectDir(R);
+      });
       break;
 
     // Ctrl-Shift-End -> select all the way to the end of the root block.
     case 'Ctrl-Shift-End':
-      ctrlr.startSelection();
-      while (cursor[R] || cursor.parent !== ctrlr.root) {
-        ctrlr.selectDirIncremental(R);
-      }
-      ctrlr.finishSelection();
+      ctrlr.withIncrementalSelection((selectDir) => {
+        while (cursor[R] || cursor.parent !== ctrlr.root) {
+          selectDir(R);
+        }
+      });
       break;
 
     // Home -> move to the start of the current block.
@@ -76,20 +74,18 @@ var SELECTION_OPEN = false;
 
     // Shift-Home -> select to the start of the current block.
     case 'Shift-Home':
-      ctrlr.startSelection();
-      while (cursor[L]) {
-        ctrlr.selectDirIncremental(L);
-      }
-      ctrlr.finishSelection();
+      ctrlr.withIncrementalSelection((selectDir) => {
+        while (cursor[L]) selectDir(L);
+      });
       break;
 
     // Ctrl-Shift-Home -> select all the way to the start of the root block.
     case 'Ctrl-Shift-Home':
-      ctrlr.startSelection();
-      while (cursor[L] || cursor.parent !== ctrlr.root) {
-        ctrlr.selectDirIncremental(L);
-      }
-      ctrlr.finishSelection()
+      ctrlr.withIncrementalSelection((selectDir) => {
+        while (cursor[L] || cursor.parent !== ctrlr.root) {
+          selectDir(L);
+        }
+      });
       break;
 
     case 'Left': ctrlr.moveLeft(); break;
@@ -104,24 +100,24 @@ var SELECTION_OPEN = false;
     case 'Down': ctrlr.moveDown(); break;
 
     case 'Shift-Up':
-      ctrlr.startSelection();
-      if (cursor[L]) {
-        while (cursor[L]) ctrlr.selectDirIncremental(L);
-      } else {
-        ctrlr.selectDirIncremental(L);
-      }
-      ctrlr.finishSelection();
+      ctrlr.withIncrementalSelection((selectDir) => {
+        if (cursor[L]) {
+          while (cursor[L]) selectDir(L);
+        } else {
+          selectDir(L);
+        }
+      });
       break;
 
     case 'Shift-Down':
-      ctrlr.startSelection();
-      if (cursor[R]) {
-        while (cursor[R]) ctrlr.selectDirIncremental(R);
-      }
-      else {
-        ctrlr.selectDirIncremental(R);
-      }
-      ctrlr.finishSelection();
+      ctrlr.withIncrementalSelection((selectDir) => {
+        if (cursor[R]) {
+          while (cursor[R]) selectDir(R);
+        }
+        else {
+          selectDir(R);
+        }
+      });
       break;
 
     case 'Ctrl-Up': break;
@@ -140,9 +136,9 @@ var SELECTION_OPEN = false;
     case 'Meta-A':
     case 'Ctrl-A':
       ctrlr.notify('move').cursor.insAtRightEnd(ctrlr.root);
-      ctrlr.startSelection()
-      while (cursor[L]) ctrlr.selectDirIncremental(L);
-      ctrlr.finishSelection()
+      ctrlr.withIncrementalSelection((selectDir) => {
+        while (cursor[L]) selectDir(L);
+      });
       break;
 
     // These remaining hotkeys are only of benefit to people running screen readers.
@@ -392,7 +388,7 @@ class Controller_keystroke extends Controller_focusBlur {
   backspace () { return this.deleteDir(L); };
   deleteForward () { return this.deleteDir(R); };
 
-  startSelection() {
+  private startSelection() {
     pray("Multiple selections can't be simultaneously open", !SELECTION_OPEN);
 
     SELECTION_OPEN = true;
@@ -404,7 +400,7 @@ class Controller_keystroke extends Controller_focusBlur {
   /**
    * Note: must be paired with startSelection and finishSelection
    */
-  selectDirIncremental(dir:Direction) {
+  private selectDirIncremental(dir:Direction) {
     pray("A selection is open", SELECTION_OPEN);
     SELECTION_OPEN = true;
 
@@ -424,7 +420,7 @@ class Controller_keystroke extends Controller_focusBlur {
     else cursor.parent.selectOutOf(dir, cursor);
   }
 
-  finishSelection() {
+  private finishSelection() {
     pray("A selection is open", SELECTION_OPEN);
     var cursor = this.cursor;
     cursor.clearSelection();
@@ -436,10 +432,40 @@ class Controller_keystroke extends Controller_focusBlur {
     SELECTION_OPEN = false;
   }
 
+  /**
+   * Used to build a selection incrementally in a loop. Calls the passed
+   * callback with a selectDir function that may be called many times,
+   * and defers updating the view until the incremental selection is
+   * complete
+   *
+   * Wraps up calling
+   *
+   *     this.startSelection()
+   *     this.selectDirIncremental(dir) // possibly many times
+   *     this.finishSelection()
+   *
+   * with extra error handling and invariant enforcement
+   */
+  withIncrementalSelection(cb:(selectDir:(dir:Direction)=>void)=>void) {
+    try {
+      this.startSelection();
+      try {
+        cb((dir)=>this.selectDirIncremental(dir));
+      } finally {
+        // Since we have started a selection, attempt to finish it even
+        // if the callback throws an error
+        this.finishSelection();
+      }
+    } finally {
+      // Mark selection as closed even if finishSelection throws an
+      // error. Makes a possible error in finishSelection more
+      // recoverable
+      SELECTION_OPEN = false;
+    }
+  }
+
   selectDir (dir:Direction) {
-    this.startSelection();
-    this.selectDirIncremental(dir);
-    this.finishSelection();
+    this.withIncrementalSelection((selectDir)=>selectDir(dir));
   };
   selectLeft () { return this.selectDir(L); };
   selectRight () { return this.selectDir(R); };
