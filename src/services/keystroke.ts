@@ -47,14 +47,14 @@ var IN_SELECT_DIR = false;
     // Shift-End -> select to the end of the current block.
     case 'Shift-End':
       while (cursor[R]) {
-        ctrlr.selectRight();
+        ctrlr.selectDir(R);
       }
       break;
 
     // Ctrl-Shift-End -> select all the way to the end of the root block.
     case 'Ctrl-Shift-End':
       while (cursor[R] || cursor.parent !== ctrlr.root) {
-        ctrlr.selectRight();
+        ctrlr.selectDir(R);
       }
       break;
 
@@ -73,14 +73,14 @@ var IN_SELECT_DIR = false;
     // Shift-Home -> select to the start of the current block.
     case 'Shift-Home':
       while (cursor[L]) {
-        ctrlr.selectLeft();
+        ctrlr.selectDir(L);
       }
       break;
 
     // Ctrl-Shift-Home -> select all the way to the start of the root block.
     case 'Ctrl-Shift-Home':
       while (cursor[L] || cursor.parent !== ctrlr.root) {
-        ctrlr.selectLeft();
+        ctrlr.selectDir(L);
       }
       break;
 
@@ -97,18 +97,18 @@ var IN_SELECT_DIR = false;
 
     case 'Shift-Up':
       if (cursor[L]) {
-        while (cursor[L]) ctrlr.selectLeft();
+        while (cursor[L]) ctrlr.selectDir(L);
       } else {
-        ctrlr.selectLeft();
+        ctrlr.selectDir(L);
       }
       break;
 
     case 'Shift-Down':
       if (cursor[R]) {
-        while (cursor[R]) ctrlr.selectRight();
+        while (cursor[R]) ctrlr.selectDir(R);
       }
       else {
-        ctrlr.selectRight();
+        ctrlr.selectDir(R);
       }
       break;
 
@@ -128,7 +128,7 @@ var IN_SELECT_DIR = false;
     case 'Meta-A':
     case 'Ctrl-A':
       ctrlr.notify('move').cursor.insAtRightEnd(ctrlr.root);
-      while (cursor[L]) ctrlr.selectLeft();
+      while (cursor[L]) ctrlr.selectDir(L);
       break;
 
     // These remaining hotkeys are only of benefit to people running screen readers.
