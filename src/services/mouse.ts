@@ -33,7 +33,7 @@ class Controller_mouse extends Controller_latex {
     this.container.bind('mousedown.mathquill', function(_e:Event) {
       var e = _e as MouseEvent;
       const eventTarget = e.target instanceof HTMLElement ? e.target : null;
-      var rootjQ = $(eventTarget?.closest('.mq-root-block'));
+      var rootjQ = $(closest(eventTarget, '.mq-root-block'));
       var root = (NodeBase.getNodeOfElement(rootjQ[0]) || NodeBase.getNodeOfElement(ultimateRootjQ[0])) as ControllerRoot;
       var ctrlr = root.controller, cursor = ctrlr.cursor, blink = cursor.blink;
       var textareaSpan = ctrlr.getTextareaSpanOrThrow();

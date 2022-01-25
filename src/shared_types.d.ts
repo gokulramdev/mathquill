@@ -111,7 +111,6 @@ interface $ {
     slice(start: number, end?: number): $;
     scrollLeft():number;
     scrollTop():number;
-    closest(selector:JQSelector): $;
     outerWidth():number;
     offset():{left:number, top:number} // TODO - this can be undefined. Either fix uses or wait until removing jquery
     length: number;
