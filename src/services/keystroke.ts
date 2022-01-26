@@ -3,228 +3,283 @@
  * interaction with the typist.
  ****************************************/
 
-var SELECTION_OPEN = false;
+/**
+ * Only one incremental selection may be open at a time. Track whether
+ * an incremental selection is open to help enforce this invariant.
+ */
+var INCREMENTAL_SELECTION_OPEN = false;
 
- class MQNode extends NodeBase {
-  keystroke (key:string, e:KeyboardEvent, ctrlr:Controller) {
+class MQNode extends NodeBase {
+  keystroke(key: string, e: KeyboardEvent, ctrlr: Controller) {
     var cursor = ctrlr.cursor;
 
     switch (key) {
-    case 'Ctrl-Shift-Backspace':
-    case 'Ctrl-Backspace':
-      ctrlr.ctrlDeleteDir(L);
-      break;
+      case 'Ctrl-Shift-Backspace':
+      case 'Ctrl-Backspace':
+        ctrlr.ctrlDeleteDir(L);
+        break;
 
-    case 'Shift-Backspace':
-    case 'Backspace':
-      ctrlr.backspace();
-      break;
+      case 'Shift-Backspace':
+      case 'Backspace':
+        ctrlr.backspace();
+        break;
 
-    // Tab or Esc -> go one block right if it exists, else escape right.
-    case 'Esc':
-    case 'Tab':
-      ctrlr.escapeDir(R, key, e);
-      return;
+      // Tab or Esc -> go one block right if it exists, else escape right.
+      case 'Esc':
+      case 'Tab':
+        ctrlr.escapeDir(R, key, e);
+        return;
 
-    // Shift-Tab -> go one block left if it exists, else escape left.
-    case 'Shift-Tab':
-    case 'Shift-Esc':
-      ctrlr.escapeDir(L, key, e);
-      return;
+      // Shift-Tab -> go one block left if it exists, else escape left.
+      case 'Shift-Tab':
+      case 'Shift-Esc':
+        ctrlr.escapeDir(L, key, e);
+        return;
 
-    // End -> move to the end of the current block.
-    case 'End':
-      ctrlr.notify('move').cursor.insAtRightEnd(cursor.parent);
-      ctrlr.aria.queue("end of").queue(cursor.parent, true);
-      break;
+      // End -> move to the end of the current block.
+      case 'End':
+        ctrlr.notify('move').cursor.insAtRightEnd(cursor.parent);
+        ctrlr.aria.queue('end of').queue(cursor.parent, true);
+        break;
 
-    // Ctrl-End -> move all the way to the end of the root block.
-    case 'Ctrl-End':
-      ctrlr.notify('move').cursor.insAtRightEnd(ctrlr.root);
-      ctrlr.aria.queue("end of").queue(ctrlr.ariaLabel).queue(ctrlr.root).queue(ctrlr.ariaPostLabel);
-      break;
+      // Ctrl-End -> move all the way to the end of the root block.
+      case 'Ctrl-End':
+        ctrlr.notify('move').cursor.insAtRightEnd(ctrlr.root);
+        ctrlr.aria
+          .queue('end of')
+          .queue(ctrlr.ariaLabel)
+          .queue(ctrlr.root)
+          .queue(ctrlr.ariaPostLabel);
+        break;
 
-    // Shift-End -> select to the end of the current block.
-    case 'Shift-End':
-      ctrlr.withIncrementalSelection((selectDir) => {
-        while (cursor[R]) selectDir(R);
-      });
-      break;
-
-    // Ctrl-Shift-End -> select all the way to the end of the root block.
-    case 'Ctrl-Shift-End':
-      ctrlr.withIncrementalSelection((selectDir) => {
-        while (cursor[R] || cursor.parent !== ctrlr.root) {
-          selectDir(R);
-        }
-      });
-      break;
-
-    // Home -> move to the start of the current block.
-    case 'Home':
-      ctrlr.notify('move').cursor.insAtLeftEnd(cursor.parent);
-      ctrlr.aria.queue("beginning of").queue(cursor.parent, true);
-      break;
-
-    // Ctrl-Home -> move all the way to the start of the root block.
-    case 'Ctrl-Home':
-      ctrlr.notify('move').cursor.insAtLeftEnd(ctrlr.root);
-      ctrlr.aria.queue("beginning of").queue(ctrlr.ariaLabel).queue(ctrlr.root).queue(ctrlr.ariaPostLabel);
-      break;
-
-    // Shift-Home -> select to the start of the current block.
-    case 'Shift-Home':
-      ctrlr.withIncrementalSelection((selectDir) => {
-        while (cursor[L]) selectDir(L);
-      });
-      break;
-
-    // Ctrl-Shift-Home -> select all the way to the start of the root block.
-    case 'Ctrl-Shift-Home':
-      ctrlr.withIncrementalSelection((selectDir) => {
-        while (cursor[L] || cursor.parent !== ctrlr.root) {
-          selectDir(L);
-        }
-      });
-      break;
-
-    case 'Left': ctrlr.moveLeft(); break;
-    case 'Shift-Left': ctrlr.selectLeft(); break;
-    case 'Ctrl-Left': break;
-
-    case 'Right': ctrlr.moveRight(); break;
-    case 'Shift-Right': ctrlr.selectRight(); break;
-    case 'Ctrl-Right': break;
-
-    case 'Up': ctrlr.moveUp(); break;
-    case 'Down': ctrlr.moveDown(); break;
-
-    case 'Shift-Up':
-      ctrlr.withIncrementalSelection((selectDir) => {
-        if (cursor[L]) {
-          while (cursor[L]) selectDir(L);
-        } else {
-          selectDir(L);
-        }
-      });
-      break;
-
-    case 'Shift-Down':
-      ctrlr.withIncrementalSelection((selectDir) => {
-        if (cursor[R]) {
+      // Shift-End -> select to the end of the current block.
+      case 'Shift-End':
+        ctrlr.withIncrementalSelection((selectDir) => {
           while (cursor[R]) selectDir(R);
+        });
+        break;
+
+      // Ctrl-Shift-End -> select all the way to the end of the root block.
+      case 'Ctrl-Shift-End':
+        ctrlr.withIncrementalSelection((selectDir) => {
+          while (cursor[R] || cursor.parent !== ctrlr.root) {
+            selectDir(R);
+          }
+        });
+        break;
+
+      // Home -> move to the start of the current block.
+      case 'Home':
+        ctrlr.notify('move').cursor.insAtLeftEnd(cursor.parent);
+        ctrlr.aria.queue('beginning of').queue(cursor.parent, true);
+        break;
+
+      // Ctrl-Home -> move all the way to the start of the root block.
+      case 'Ctrl-Home':
+        ctrlr.notify('move').cursor.insAtLeftEnd(ctrlr.root);
+        ctrlr.aria
+          .queue('beginning of')
+          .queue(ctrlr.ariaLabel)
+          .queue(ctrlr.root)
+          .queue(ctrlr.ariaPostLabel);
+        break;
+
+      // Shift-Home -> select to the start of the current block.
+      case 'Shift-Home':
+        ctrlr.withIncrementalSelection((selectDir) => {
+          while (cursor[L]) selectDir(L);
+        });
+        break;
+
+      // Ctrl-Shift-Home -> select all the way to the start of the root block.
+      case 'Ctrl-Shift-Home':
+        ctrlr.withIncrementalSelection((selectDir) => {
+          while (cursor[L] || cursor.parent !== ctrlr.root) {
+            selectDir(L);
+          }
+        });
+        break;
+
+      case 'Left':
+        ctrlr.moveLeft();
+        break;
+      case 'Shift-Left':
+        ctrlr.selectLeft();
+        break;
+      case 'Ctrl-Left':
+        break;
+
+      case 'Right':
+        ctrlr.moveRight();
+        break;
+      case 'Shift-Right':
+        ctrlr.selectRight();
+        break;
+      case 'Ctrl-Right':
+        break;
+
+      case 'Up':
+        ctrlr.moveUp();
+        break;
+      case 'Down':
+        ctrlr.moveDown();
+        break;
+
+      case 'Shift-Up':
+        ctrlr.withIncrementalSelection((selectDir) => {
+          if (cursor[L]) {
+            while (cursor[L]) selectDir(L);
+          } else {
+            selectDir(L);
+          }
+        });
+        break;
+
+      case 'Shift-Down':
+        ctrlr.withIncrementalSelection((selectDir) => {
+          if (cursor[R]) {
+            while (cursor[R]) selectDir(R);
+          } else {
+            selectDir(R);
+          }
+        });
+        break;
+
+      case 'Ctrl-Up':
+        break;
+      case 'Ctrl-Down':
+        break;
+
+      case 'Ctrl-Shift-Del':
+      case 'Ctrl-Del':
+        ctrlr.ctrlDeleteDir(R);
+        break;
+
+      case 'Shift-Del':
+      case 'Del':
+        ctrlr.deleteForward();
+        break;
+
+      case 'Meta-A':
+      case 'Ctrl-A':
+        ctrlr.selectAll();
+        break;
+
+      // These remaining hotkeys are only of benefit to people running screen readers.
+      case 'Ctrl-Alt-Up': // speak parent block that has focus
+        if (cursor.parent.parent && cursor.parent.parent instanceof MQNode)
+          ctrlr.aria.queue(cursor.parent.parent);
+        else ctrlr.aria.queue('nothing above');
+        break;
+
+      case 'Ctrl-Alt-Down': // speak current block that has focus
+        if (cursor.parent && cursor.parent instanceof MQNode)
+          ctrlr.aria.queue(cursor.parent);
+        else ctrlr.aria.queue('block is empty');
+        break;
+
+      case 'Ctrl-Alt-Left': // speak left-adjacent block
+        if (
+          cursor.parent.parent &&
+          cursor.parent.parent.ends &&
+          cursor.parent.parent.ends[L] &&
+          cursor.parent.parent.ends[L] instanceof MQNode
+        ) {
+          ctrlr.aria.queue(cursor.parent.parent.ends[L]);
+        } else {
+          ctrlr.aria.queue('nothing to the left');
         }
-        else {
-          selectDir(R);
+        break;
+
+      case 'Ctrl-Alt-Right': // speak right-adjacent block
+        if (
+          cursor.parent.parent &&
+          cursor.parent.parent.ends &&
+          cursor.parent.parent.ends[R] &&
+          cursor.parent.parent.ends[R] instanceof MQNode
+        ) {
+          ctrlr.aria.queue(cursor.parent.parent.ends[R]);
+        } else {
+          ctrlr.aria.queue('nothing to the right');
         }
-      });
-      break;
+        break;
 
-    case 'Ctrl-Up': break;
-    case 'Ctrl-Down': break;
+      case 'Ctrl-Alt-Shift-Down': // speak selection
+        if (cursor.selection)
+          ctrlr.aria.queue(
+            cursor.selection.join('mathspeak', ' ').trim() + ' selected'
+          );
+        else ctrlr.aria.queue('nothing selected');
+        break;
 
-    case 'Ctrl-Shift-Del':
-    case 'Ctrl-Del':
-      ctrlr.ctrlDeleteDir(R);
-      break;
+      case 'Ctrl-Alt-=':
+      case 'Ctrl-Alt-Shift-Right': // speak ARIA post label (evaluation or error)
+        if (ctrlr.ariaPostLabel.length) ctrlr.aria.queue(ctrlr.ariaPostLabel);
+        else ctrlr.aria.queue('no answer');
+        break;
 
-    case 'Shift-Del':
-    case 'Del':
-      ctrlr.deleteForward();
-      break;
-
-    case 'Meta-A':
-    case 'Ctrl-A':
-      ctrlr.selectAll();
-      break;
-
-    // These remaining hotkeys are only of benefit to people running screen readers.
-    case 'Ctrl-Alt-Up': // speak parent block that has focus
-      if (cursor.parent.parent && cursor.parent.parent instanceof MQNode) ctrlr.aria.queue(cursor.parent.parent);
-      else ctrlr.aria.queue('nothing above');
-      break;
-
-    case 'Ctrl-Alt-Down': // speak current block that has focus
-      if (cursor.parent && cursor.parent instanceof MQNode) ctrlr.aria.queue(cursor.parent);
-      else ctrlr.aria.queue('block is empty');
-      break;
-
-    case 'Ctrl-Alt-Left': // speak left-adjacent block
-      if (
-        cursor.parent.parent &&
-        cursor.parent.parent.ends &&
-        cursor.parent.parent.ends[L] &&
-        cursor.parent.parent.ends[L] instanceof MQNode
-      ) {
-        ctrlr.aria.queue(cursor.parent.parent.ends[L]);
-      } else {
-        ctrlr.aria.queue('nothing to the left');
-      }
-      break;
-
-    case 'Ctrl-Alt-Right': // speak right-adjacent block
-      if (
-        cursor.parent.parent &&
-        cursor.parent.parent.ends &&
-        cursor.parent.parent.ends[R] &&
-        cursor.parent.parent.ends[R] instanceof MQNode
-      ) {
-        ctrlr.aria.queue(cursor.parent.parent.ends[R]);
-      } else {
-        ctrlr.aria.queue('nothing to the right');
-      }
-      break;
-
-    case 'Ctrl-Alt-Shift-Down': // speak selection
-      if (cursor.selection) ctrlr.aria.queue(cursor.selection.join('mathspeak', ' ').trim() + ' selected');
-      else ctrlr.aria.queue('nothing selected');
-      break;
-
-    case 'Ctrl-Alt-=':
-    case 'Ctrl-Alt-Shift-Right': // speak ARIA post label (evaluation or error)
-      if (ctrlr.ariaPostLabel.length) ctrlr.aria.queue(ctrlr.ariaPostLabel);
-      else ctrlr.aria.queue('no answer');
-      break;
-
-    default:
-      return;
+      default:
+        return;
     }
     ctrlr.aria.alert();
     e.preventDefault();
     ctrlr.scrollHoriz();
-  };
+  }
 
-  moveOutOf (_dir:Direction, _cursor:Cursor, _updown?:'up' | 'down') { pray('overridden or never called on this node'); } // called by Controller::escapeDir, moveDir
-  moveTowards (_dir:Direction, _cursor:Cursor, _updown?:'up' | 'down') { pray('overridden or never called on this node'); } // called by Controller::moveDir
-  deleteOutOf (_dir:Direction, _cursor:Cursor) { pray('overridden or never called on this node'); } // called by Controller::deleteDir
-  deleteTowards (_dir:Direction, _cursor:Cursor) { pray('overridden or never called on this node'); } // called by Controller::deleteDir
-  unselectInto (_dir:Direction, _cursor:Cursor) { pray('overridden or never called on this node'); } // called by Controller::selectDir
-  selectOutOf (_dir:Direction, _cursor:Cursor) { pray('overridden or never called on this node'); } // called by Controller::selectDir
-  selectTowards (_dir:Direction, _cursor:Cursor) { pray('overridden or never called on this node'); } // called by Controller::selectDir
+  moveOutOf(_dir: Direction, _cursor: Cursor, _updown?: 'up' | 'down') {
+    pray('overridden or never called on this node');
+  } // called by Controller::escapeDir, moveDir
+  moveTowards(_dir: Direction, _cursor: Cursor, _updown?: 'up' | 'down') {
+    pray('overridden or never called on this node');
+  } // called by Controller::moveDir
+  deleteOutOf(_dir: Direction, _cursor: Cursor) {
+    pray('overridden or never called on this node');
+  } // called by Controller::deleteDir
+  deleteTowards(_dir: Direction, _cursor: Cursor) {
+    pray('overridden or never called on this node');
+  } // called by Controller::deleteDir
+  unselectInto(_dir: Direction, _cursor: Cursor) {
+    pray('overridden or never called on this node');
+  } // called by Controller::selectDir
+  selectOutOf(_dir: Direction, _cursor: Cursor) {
+    pray('overridden or never called on this node');
+  } // called by Controller::selectDir
+  selectTowards(_dir: Direction, _cursor: Cursor) {
+    pray('overridden or never called on this node');
+  } // called by Controller::selectDir
 }
 
-ControllerBase.onNotify(function(cursor:Cursor, e:ControllerEvent) {
+ControllerBase.onNotify(function (cursor: Cursor, e: ControllerEvent) {
   if (e === 'move' || e === 'upDown') cursor.show().clearSelection();
 });
-optionProcessors.leftRightIntoCmdGoes = function(updown:'up'|'down') {
+optionProcessors.leftRightIntoCmdGoes = function (updown: 'up' | 'down') {
   if (updown && updown !== 'up' && updown !== 'down') {
-    throw '"up" or "down" required for leftRightIntoCmdGoes option, '
-          + 'got "'+updown+'"';
+    throw (
+      '"up" or "down" required for leftRightIntoCmdGoes option, ' +
+      'got "' +
+      updown +
+      '"'
+    );
   }
   return updown;
 };
 
-
-ControllerBase.onNotify(function(cursor:Cursor, e:ControllerEvent) { if (e !== 'upDown') cursor.upDownCache = {}; });
-ControllerBase.onNotify(function(cursor:Cursor, e:ControllerEvent) { if (e === 'edit') cursor.show().deleteSelection(); });
-ControllerBase.onNotify(function(cursor:Cursor, e:ControllerEvent) { if (e !== 'select') cursor.endSelection(); });
+ControllerBase.onNotify(function (cursor: Cursor, e: ControllerEvent) {
+  if (e !== 'upDown') cursor.upDownCache = {};
+});
+ControllerBase.onNotify(function (cursor: Cursor, e: ControllerEvent) {
+  if (e === 'edit') cursor.show().deleteSelection();
+});
+ControllerBase.onNotify(function (cursor: Cursor, e: ControllerEvent) {
+  if (e !== 'select') cursor.endSelection();
+});
 
 class Controller_keystroke extends Controller_focusBlur {
-  keystroke (key:string, evt:KeyboardEvent) {
+  keystroke(key: string, evt: KeyboardEvent) {
     this.cursor.parent.keystroke(key, evt, this.getControllerSelf());
-  };
+  }
 
-  escapeDir (dir:Direction, _key:string, e:KeyboardEvent) {
+  escapeDir(dir: Direction, _key: string, e: KeyboardEvent) {
     prayDirection(dir);
     var cursor = this.cursor;
 
@@ -238,22 +293,26 @@ class Controller_keystroke extends Controller_focusBlur {
     cursor.parent.moveOutOf(dir, cursor);
     cursor.controller.aria.alert();
     return this.notify('move');
-  };
-  moveDir (dir:Direction) {
+  }
+  moveDir(dir: Direction) {
     prayDirection(dir);
-    var cursor = this.cursor, updown = cursor.options.leftRightIntoCmdGoes;
+    var cursor = this.cursor,
+      updown = cursor.options.leftRightIntoCmdGoes;
     var cursorDir = cursor[dir];
 
     if (cursor.selection) {
       cursor.insDirOf(dir, cursor.selection.ends[dir] as MQNode);
-    }
-    else if (cursorDir) cursorDir.moveTowards(dir, cursor, updown);
+    } else if (cursorDir) cursorDir.moveTowards(dir, cursor, updown);
     else cursor.parent.moveOutOf(dir, cursor, updown);
 
     return this.notify('move');
-  };
-  moveLeft () { return this.moveDir(L); };
-  moveRight () { return this.moveDir(R); };
+  }
+  moveLeft() {
+    return this.moveDir(L);
+  }
+  moveRight() {
+    return this.moveDir(R);
+  }
 
   /**
    * moveUp and moveDown have almost identical algorithms:
@@ -267,13 +326,17 @@ class Controller_keystroke extends Controller_focusBlur {
    *       as close to directly above/below the current position as possible)
    *   + unless it's exactly `true`, stop bubbling
    */
-  moveUp () { return this.moveUpDown('up'); };
-  moveDown () { return this.moveUpDown('down'); };
-  moveUpDown (dir:'up'|'down') {
+  moveUp() {
+    return this.moveUpDown('up');
+  }
+  moveDown() {
+    return this.moveUpDown('down');
+  }
+  moveUpDown(dir: 'up' | 'down') {
     var self = this;
     var cursor = self.notify('upDown').cursor;
-    var dirInto:'upInto' | 'downInto';
-    var dirOutOf:'upOutOf' | 'downOutOf';
+    var dirInto: 'upInto' | 'downInto';
+    var dirOutOf: 'upOutOf' | 'downOutOf';
 
     if (dir === 'up') {
       dirInto = 'upInto';
@@ -291,39 +354,50 @@ class Controller_keystroke extends Controller_focusBlur {
     if (cursorR_dirInto) cursor.insAtLeftEnd(cursorR_dirInto);
     else if (cursorL_dirInto) cursor.insAtRightEnd(cursorL_dirInto);
     else {
-      cursor.parent.bubble(function(ancestor:MQNode) { // TODO - revist this
+      cursor.parent.bubble(function (ancestor: MQNode) {
+        // TODO - revist this
         var prop = ancestor[dirOutOf];
         if (prop) {
-          if (typeof prop === 'function') prop = prop.call(ancestor,cursor) as any; // TODO - figure out if we need to assign to prop
+          if (typeof prop === 'function')
+            prop = prop.call(ancestor, cursor) as any; // TODO - figure out if we need to assign to prop
           if (prop instanceof MQNode) cursor.jumpUpDown(ancestor, prop);
-          if (prop as any !== true) return false; // TODO - figure out how this can return true
+          if ((prop as any) !== true) return false; // TODO - figure out how this can return true
         }
         return undefined;
       });
     }
     return self;
   }
-  deleteDir (dir:Direction) {
+  deleteDir(dir: Direction) {
     prayDirection(dir);
     var cursor = this.cursor;
     var cursorEl = cursor[dir] as MQNode;
     var cursorElParent = cursor.parent.parent;
     var ctrlr = cursor.controller;
 
-    if(cursorEl && cursorEl instanceof MQNode) {
-      if(cursorEl.sides ) {
-        ctrlr.aria.queue(cursorEl.parent.chToCmd(cursorEl.sides[-dir as Direction].ch).mathspeak({createdLeftOf: cursor}));
-      // generally, speak the current element if it has no blocks,
-      // but don't for text block commands as the deleteTowards method
-      // in the TextCommand class is responsible for speaking the new character under the cursor.
+    if (cursorEl && cursorEl instanceof MQNode) {
+      if (cursorEl.sides) {
+        ctrlr.aria.queue(
+          cursorEl.parent
+            .chToCmd(cursorEl.sides[-dir as Direction].ch)
+            .mathspeak({ createdLeftOf: cursor })
+        );
+        // generally, speak the current element if it has no blocks,
+        // but don't for text block commands as the deleteTowards method
+        // in the TextCommand class is responsible for speaking the new character under the cursor.
       } else if (!cursorEl.blocks && cursorEl.parent.ctrlSeq !== '\\text') {
         ctrlr.aria.queue(cursorEl);
       }
-    } else if(cursorElParent && cursorElParent instanceof MQNode) {
-      if(cursorElParent.sides) {
-        ctrlr.aria.queue(cursorElParent.parent.chToCmd(cursorElParent.sides[dir].ch).mathspeak({createdLeftOf: cursor}));
+    } else if (cursorElParent && cursorElParent instanceof MQNode) {
+      if (cursorElParent.sides) {
+        ctrlr.aria.queue(
+          cursorElParent.parent
+            .chToCmd(cursorElParent.sides[dir].ch)
+            .mathspeak({ createdLeftOf: cursor })
+        );
       } else if (cursorElParent.blocks && cursorElParent.mathspeakTemplate) {
-        if (cursorElParent.upInto && cursorElParent.downInto) { // likely a fraction, and we just backspaced over the slash
+        if (cursorElParent.upInto && cursorElParent.downInto) {
+          // likely a fraction, and we just backspaced over the slash
           ctrlr.aria.queue(cursorElParent.mathspeakTemplate[1]);
         } else {
           var mst = cursorElParent.mathspeakTemplate;
@@ -353,8 +427,8 @@ class Controller_keystroke extends Controller_focusBlur {
     });
 
     return this;
-  };
-  ctrlDeleteDir (dir:Direction) {
+  }
+  ctrlDeleteDir(dir: Direction) {
     prayDirection(dir);
     var cursor = this.cursor;
     if (!cursor[dir] || cursor.selection) return this.deleteDir(dir);
@@ -362,9 +436,15 @@ class Controller_keystroke extends Controller_focusBlur {
     this.notify('edit');
     var fragRemoved;
     if (dir === L) {
-      fragRemoved = new Fragment((cursor.parent as MQNode).ends[L] as MQNode, cursor[L] as MQNode);
+      fragRemoved = new Fragment(
+        (cursor.parent as MQNode).ends[L] as MQNode,
+        cursor[L] as MQNode
+      );
     } else {
-      fragRemoved = new Fragment(cursor[R] as MQNode, (cursor.parent as MQNode).ends[R] as MQNode);
+      fragRemoved = new Fragment(
+        cursor[R] as MQNode,
+        (cursor.parent as MQNode).ends[R] as MQNode
+      );
     }
     cursor.controller.aria.queue(fragRemoved);
     fragRemoved.remove();
@@ -381,27 +461,42 @@ class Controller_keystroke extends Controller_focusBlur {
     });
 
     return this;
-  };
-  backspace () { return this.deleteDir(L); };
-  deleteForward () { return this.deleteDir(R); };
+  }
+  backspace() {
+    return this.deleteDir(L);
+  }
+  deleteForward() {
+    return this.deleteDir(R);
+  }
 
-  private startSelection() {
-    pray("Multiple selections can't be simultaneously open", !SELECTION_OPEN);
+  /**
+   * startSelection, selectDirIncremental, and finishSelection should
+   * only be called by withIncrementalSelection because they must be
+   * called in sequence.
+   */
+  private startIncrementalSelection() {
+    pray("Multiple selections can't be simultaneously open", !INCREMENTAL_SELECTION_OPEN);
 
-    SELECTION_OPEN = true;
+    INCREMENTAL_SELECTION_OPEN = true;
     this.notify('select');
     var cursor = this.cursor;
     if (!cursor.anticursor) cursor.startSelection();
   }
 
   /**
-   * Note: must be paired with startSelection and finishSelection
+   * Update the selection model, stored in cursor, without modifying
+   * selection DOM.
+   *
+   * startSelection, selectDirIncremental, and finishSelection should
+   * only be called by withIncrementalSelection because they must be
+   * called in sequence.
    */
-  private selectDirIncremental(dir:Direction) {
-    pray("A selection is open", SELECTION_OPEN);
-    SELECTION_OPEN = true;
+  private selectDirIncremental(dir: Direction) {
+    pray('A selection is open', INCREMENTAL_SELECTION_OPEN);
+    INCREMENTAL_SELECTION_OPEN = true;
 
-    var cursor = this.cursor, seln = cursor.selection;
+    var cursor = this.cursor,
+      seln = cursor.selection;
     prayDirection(dir);
 
     var node = cursor[dir];
@@ -409,24 +504,35 @@ class Controller_keystroke extends Controller_focusBlur {
       // "if node we're selecting towards is inside selection (hence retracting)
       // and is on the *far side* of the selection (hence is only node selected)
       // and the anticursor is *inside* that node, not just on the other side"
-      if (seln && seln.ends[dir] === node && (cursor.anticursor as Anticursor)[-dir as Direction] !== node) {
+      if (
+        seln &&
+        seln.ends[dir] === node &&
+        (cursor.anticursor as Anticursor)[-dir as Direction] !== node
+      ) {
         node.unselectInto(dir, cursor);
-      }
-      else node.selectTowards(dir, cursor);
-    }
-    else cursor.parent.selectOutOf(dir, cursor);
+      } else node.selectTowards(dir, cursor);
+    } else cursor.parent.selectOutOf(dir, cursor);
   }
 
-  private finishSelection() {
-    pray("A selection is open", SELECTION_OPEN);
+  /**
+   * Update selection DOM to match cursor model
+   *
+   * startSelection, selectDirIncremental, and finishSelection should
+   * only be called by withIncrementalSelection because they must be
+   * called in sequence.
+   */
+  private finishIncrementalSelection() {
+    pray('A selection is open', INCREMENTAL_SELECTION_OPEN);
     var cursor = this.cursor;
     cursor.clearSelection();
     cursor.select() || cursor.show();
     var selection = cursor.selection;
     if (selection) {
-      cursor.controller.aria.clear().queue(selection.join('mathspeak', ' ').trim() + ' selected'); // clearing first because selection fires several times, and we don't want repeated speech.
+      cursor.controller.aria
+        .clear()
+        .queue(selection.join('mathspeak', ' ').trim() + ' selected'); // clearing first because selection fires several times, and we don't want repeated speech.
     }
-    SELECTION_OPEN = false;
+    INCREMENTAL_SELECTION_OPEN = false;
   }
 
   /**
@@ -443,29 +549,39 @@ class Controller_keystroke extends Controller_focusBlur {
    *
    * with extra error handling and invariant enforcement
    */
-  withIncrementalSelection(cb:(selectDir:(dir:Direction)=>void)=>void) {
+  withIncrementalSelection(cb: (selectDir: (dir: Direction) => void) => void) {
     try {
-      this.startSelection();
+      this.startIncrementalSelection();
       try {
-        cb((dir)=>this.selectDirIncremental(dir));
+        cb((dir) => this.selectDirIncremental(dir));
       } finally {
         // Since we have started a selection, attempt to finish it even
         // if the callback throws an error
-        this.finishSelection();
+        this.finishIncrementalSelection();
       }
     } finally {
       // Mark selection as closed even if finishSelection throws an
       // error. Makes a possible error in finishSelection more
       // recoverable
-      SELECTION_OPEN = false;
+      INCREMENTAL_SELECTION_OPEN = false;
     }
   }
 
-  selectDir (dir:Direction) {
-    this.withIncrementalSelection((selectDir)=>selectDir(dir));
-  };
-  selectLeft () { return this.selectDir(L); };
-  selectRight () { return this.selectDir(R); };
+  /**
+   * Grow selection one unit in the given direction
+   *
+   * Note, this should not be called in a loop. To incrementally grow a
+   * selection, use withIncrementalSelection
+   */
+  selectDir(dir: Direction) {
+    this.withIncrementalSelection((selectDir) => selectDir(dir));
+  }
+  selectLeft() {
+    return this.selectDir(L);
+  }
+  selectRight() {
+    return this.selectDir(R);
+  }
   selectAll() {
     this.notify('move');
     const cursor = this.cursor;
@@ -474,4 +590,4 @@ class Controller_keystroke extends Controller_focusBlur {
       while (cursor[L]) selectDir(L);
     });
   }
-};
+}
