@@ -54,18 +54,12 @@ class MQNode extends NodeBase {
 
       // Shift-End -> select to the end of the current block.
       case 'Shift-End':
-        ctrlr.withIncrementalSelection((selectDir) => {
-          while (cursor[R]) selectDir(R);
-        });
+        ctrlr.selectToBlockEndInDir(R);
         break;
 
       // Ctrl-Shift-End -> select all the way to the end of the root block.
       case 'Ctrl-Shift-End':
-        ctrlr.withIncrementalSelection((selectDir) => {
-          while (cursor[R] || cursor.parent !== ctrlr.root) {
-            selectDir(R);
-          }
-        });
+        ctrlr.selectToRootEndInDir(R);
         break;
 
       // Home -> move to the start of the current block.
@@ -86,18 +80,12 @@ class MQNode extends NodeBase {
 
       // Shift-Home -> select to the start of the current block.
       case 'Shift-Home':
-        ctrlr.withIncrementalSelection((selectDir) => {
-          while (cursor[L]) selectDir(L);
-        });
+        ctrlr.selectToBlockEndInDir(L);
         break;
 
       // Ctrl-Shift-Home -> select all the way to the start of the root block.
       case 'Ctrl-Shift-Home':
-        ctrlr.withIncrementalSelection((selectDir) => {
-          while (cursor[L] || cursor.parent !== ctrlr.root) {
-            selectDir(L);
-          }
-        });
+        ctrlr.selectToRootEndInDir(L);
         break;
 
       case 'Left':
@@ -588,6 +576,20 @@ class Controller_keystroke extends Controller_focusBlur {
     cursor.insAtRightEnd(this.root);
     this.withIncrementalSelection((selectDir) => {
       while (cursor[L]) selectDir(L);
+    });
+  }
+  selectToBlockEndInDir(dir: Direction) {
+    const cursor = this.cursor;
+    this.withIncrementalSelection((selectDir) => {
+      while (cursor[dir]) selectDir(dir);
+    });
+  }
+  selectToRootEndInDir(dir: Direction) {
+    const cursor = this.cursor;
+    this.withIncrementalSelection((selectDir) => {
+      while (cursor[dir] || cursor.parent !== this.root) {
+        selectDir(dir);
+      }
     });
   }
 }
