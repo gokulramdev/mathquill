@@ -463,7 +463,10 @@ class Controller_keystroke extends Controller_focusBlur {
    * called in sequence.
    */
   private startIncrementalSelection() {
-    pray("Multiple selections can't be simultaneously open", !INCREMENTAL_SELECTION_OPEN);
+    pray(
+      "Multiple selections can't be simultaneously open",
+      !INCREMENTAL_SELECTION_OPEN
+    );
 
     INCREMENTAL_SELECTION_OPEN = true;
     this.notify('select');
