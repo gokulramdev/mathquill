@@ -458,9 +458,9 @@ class Controller_keystroke extends Controller_focusBlur {
   }
 
   /**
-   * startSelection, selectDirIncremental, and finishSelection should
-   * only be called by withIncrementalSelection because they must be
-   * called in sequence.
+   * startIncrementalSelection, selectDirIncremental, and finishIncrementalSelection
+   * should only be called by withIncrementalSelection because they must
+   * be called in sequence.
    */
   private startIncrementalSelection() {
     pray(
@@ -478,9 +478,9 @@ class Controller_keystroke extends Controller_focusBlur {
    * Update the selection model, stored in cursor, without modifying
    * selection DOM.
    *
-   * startSelection, selectDirIncremental, and finishSelection should
-   * only be called by withIncrementalSelection because they must be
-   * called in sequence.
+   * startIncrementalSelection, selectDirIncremental, and finishIncrementalSelection
+   * should only be called by withIncrementalSelection because they must
+   * be called in sequence.
    */
   private selectDirIncremental(dir: Direction) {
     pray('A selection is open', INCREMENTAL_SELECTION_OPEN);
@@ -508,9 +508,9 @@ class Controller_keystroke extends Controller_focusBlur {
   /**
    * Update selection DOM to match cursor model
    *
-   * startSelection, selectDirIncremental, and finishSelection should
-   * only be called by withIncrementalSelection because they must be
-   * called in sequence.
+   * startIncrementalSelection, selectDirIncremental, and finishIncrementalSelection
+   * should only be called by withIncrementalSelection because they must
+   * be called in sequence.
    */
   private finishIncrementalSelection() {
     pray('A selection is open', INCREMENTAL_SELECTION_OPEN);
