@@ -6,7 +6,7 @@ class TempSingleCharNode extends MQNode {
 
 // Parser MathBlock
 var latexMathParser = (function () {
-  function commandToBlock(cmd: MQNode | Fragment): MathBlock {
+  function commandToBlock(cmd: MQNode | Fragment | EmptyFragment): MathBlock {
     // can also take in a Fragment
     var block = new MathBlock();
     cmd.adopt(block, 0, 0);

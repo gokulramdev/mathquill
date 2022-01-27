@@ -266,7 +266,7 @@ function getCtrlSeqsFromBlock(block: NodeRef): string {
   if (!block) return '';
 
   var children = block.children();
-  if (!children || !children.ends[L]) return '';
+  if (children instanceof EmptyFragment) return '';
 
   var chars = '';
   for (
@@ -324,7 +324,11 @@ class SupSub extends MathCommand {
           else if (!src.isEmpty()) {
             // ins src children at -dir end of dest
             src.jQ.children().insAtDirEnd(-dir as Direction, dest.jQ);
-            var children = src.children().disown();
+            var children = src.children().disown() as Fragment;
+            pray(
+              'children are not empty',
+              !(children instanceof EmptyFragment)
+            );
             pt = new Point(dest, children.ends[R], dest.ends[L]);
             if (dir === L) children.adopt(dest, dest.ends[R], 0);
             else children.adopt(dest, 0, dest.ends[L]);
@@ -452,7 +456,12 @@ class SupSub extends MathCommand {
           cursor.insDirOf(this[dir] ? (-dir as Direction) : dir, this.parent);
           if (!this.isEmpty()) {
             var end = this.ends[dir];
-            this.children()
+            var children = this.children() as Fragment;
+            pray(
+              'children are not empty',
+              !(children instanceof EmptyFragment)
+            );
+            children
               .disown()
               .withDirAdopt(
                 dir,
@@ -1183,11 +1192,13 @@ class Bracket extends DelimsNode {
   }
   placeCursor() {}
   unwrap() {
-    (this.ends[L] as MQNode)
+    var frag = (this.ends[L] as MQNode)
       .children()
       .disown()
-      .adopt(this.parent, this, this[R])
-      .jQ.insertAfter(this.jQ);
+      .adopt(this.parent, this, this[R]);
+    if (!(frag instanceof EmptyFragment)) {
+      frag.jQ.insertAfter(this.jQ);
+    }
     this.remove();
   }
   deleteSide(side: Direction, outward: boolean, cursor: Cursor) {

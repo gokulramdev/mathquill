@@ -159,7 +159,7 @@ suite('tree', function () {
 
   suite('fragments', function () {
     test('an empty fragment', function () {
-      var empty = new Fragment();
+      var empty = new EmptyFragment();
       var count = 0;
 
       empty.each(function () {
@@ -167,6 +167,12 @@ suite('tree', function () {
       });
 
       assert.equal(count, 0, 'each is a noop on an empty fragment');
+    });
+
+    test('Constructing a Fragment with empty ends is disallowed', function () {
+      assert.throws(function () {
+        new Fragment();
+      }, 'new Fragment()');
     });
 
     test('half-empty fragments are disallowed', function () {

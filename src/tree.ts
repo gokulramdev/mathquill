@@ -320,7 +320,10 @@ class NodeBase {
   }
 
   children() {
-    return new Fragment(this.ends[L] as MQNode, this.ends[R] as MQNode);
+    var leftEnd = this.ends[L];
+    var rightEnd = this.ends[R];
+    if (!leftEnd || !rightEnd) return new EmptyFragment();
+    return new Fragment(leftEnd, rightEnd);
   }
 
   eachChild(yield_: (el: MQNode) => boolean | undefined) {
@@ -390,7 +393,7 @@ class NodeBase {
   }
 
   // Overridden by child classes
-  parser(): Parser<MQNode | Fragment> {
+  parser(): Parser<MQNode | Fragment | EmptyFragment> {
     pray('Abstract parser() method is never called', false);
     return undefined as any;
   }
@@ -451,6 +454,18 @@ function prayWellFormed(parent: MQNode, leftward: NodeRef, rightward: NodeRef) {
   );
 }
 
+interface MaybeEmptyFragment {
+  adopt(
+    parent: MQNode,
+    leftward: NodeRef,
+    rightward: NodeRef
+  ): MaybeEmptyFragment;
+  disown(): MaybeEmptyFragment;
+  remove(): MaybeEmptyFragment;
+  each(yield_: (el: MQNode) => boolean | undefined): MaybeEmptyFragment;
+  fold<T>(fold: T, yield_: (fold: T, el: MQNode) => T): T;
+}
+
 /**
  * An entity outside the virtual tree with one-way pointers (so it's only a
  * "view" of part of the tree, not an actual node/entity in the tree) that
@@ -462,26 +477,24 @@ function prayWellFormed(parent: MQNode, leftward: NodeRef, rightward: NodeRef) {
  * have no reference to it and in fact may still be in the visible tree (unlike
  * DocumentFragment, whose contents must be detached from the visible tree
  * and have their 'parent' pointers set to the DocumentFragment).
+ *
+ * A Fragment cannot be empty. Instead, empty fragments are represented by the
+ * separate EmptyFragment class, which implements a subset of the Fragment
+ * interface.
  */
-class Fragment {
+class Fragment implements MaybeEmptyFragment {
   /** The (doubly-linked) list of nodes contained in this fragment. */
-  ends: {
-    [L]?: MQNode;
-    [R]?: MQNode;
+  readonly ends: {
+    readonly [L]: MQNode;
+    readonly [R]: MQNode;
   };
 
   jQ = defaultJQ;
-  disowned: boolean = false;
+  private disowned: boolean = false;
 
-  constructor(withDir?: MQNode, oppDir?: MQNode, dir?: Direction) {
+  constructor(withDir: MQNode, oppDir: MQNode, dir?: Direction) {
     if (dir === undefined) dir = L;
     prayDirection(dir);
-
-    pray('no half-empty fragments', !withDir === !oppDir);
-
-    this.ends = {};
-
-    if (!withDir || !oppDir) return;
 
     pray('withDir is passed to Fragment', withDir instanceof MQNode);
     pray('oppDir is passed to Fragment', oppDir instanceof MQNode);
@@ -490,8 +503,14 @@ class Fragment {
       withDir.parent === oppDir.parent
     );
 
-    this.ends[dir as Direction] = withDir;
-    this.ends[-dir as Direction] = oppDir;
+    var ends = {} as {
+      [L]: MQNode;
+      [R]: MQNode;
+    };
+    ends[dir as Direction] = withDir;
+    ends[-dir as Direction] = oppDir;
+
+    this.ends = ends;
 
     // To build the jquery collection for a fragment, accumulate elements
     // into an array and then call jQ.add once on the result. jQ.add sorts the
@@ -532,10 +551,7 @@ class Fragment {
     this.disowned = false;
 
     var leftEnd = self.ends[L];
-    if (!leftEnd) return this;
-
     var rightEnd = self.ends[R];
-    if (!rightEnd) return this;
 
     if (leftward) {
       // NB: this is handled in the ::each() block
@@ -569,15 +585,13 @@ class Fragment {
    */
   disown() {
     var self = this;
-    var leftEnd = self.ends[L];
 
-    // guard for empty and already-disowned fragments
-    if (!leftEnd || self.disowned) return self;
-
+    // guard for already-disowned fragments
+    if (self.disowned) return self;
     this.disowned = true;
 
+    var leftEnd = self.ends[L];
     var rightEnd = self.ends[R];
-    if (!rightEnd) return self;
     var parent = leftEnd.parent;
 
     prayWellFormed(parent, leftEnd[L], leftEnd);
@@ -606,12 +620,31 @@ class Fragment {
   }
 
   each(yield_: (el: MQNode) => boolean | undefined) {
-    eachNode(this.ends as Ends, yield_); // TODO - the types of Ends are not compatible
+    eachNode(this.ends, yield_);
     return this;
   }
 
   fold<T>(fold: T, yield_: (fold: T, el: MQNode) => T) {
-    return foldNodes(this.ends as Ends, fold, yield_); // TODO - the types of Ends are not compatible
+    return foldNodes(this.ends, fold, yield_);
+  }
+}
+
+class EmptyFragment implements MaybeEmptyFragment {
+  adopt(parent: MQNode, leftward: NodeRef, rightward: NodeRef) {
+    prayWellFormed(parent, leftward, rightward);
+    return this;
+  }
+  disown() {
+    return this;
+  }
+  remove() {
+    return this;
+  }
+  each(_yield: (el: MQNode) => boolean | undefined) {
+    return this;
+  }
+  fold<T>(fold: T, _yield: (fold: T, el: MQNode) => T) {
+    return fold;
   }
 }
 
