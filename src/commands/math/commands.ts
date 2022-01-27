@@ -324,7 +324,7 @@ class SupSub extends MathCommand {
           else if (!src.isEmpty()) {
             // ins src children at -dir end of dest
             src.jQ.children().insAtDirEnd(-dir as Direction, dest.jQ);
-            var children = src.children().disown() as Fragment;
+            var children = src.children().disown();
             pray(
               'children are not empty',
               !(children instanceof EmptyFragment)
@@ -456,7 +456,7 @@ class SupSub extends MathCommand {
           cursor.insDirOf(this[dir] ? (-dir as Direction) : dir, this.parent);
           if (!this.isEmpty()) {
             var end = this.ends[dir];
-            var children = this.children() as Fragment;
+            var children = this.children();
             pray(
               'children are not empty',
               !(children instanceof EmptyFragment)
