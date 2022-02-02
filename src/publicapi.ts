@@ -199,6 +199,7 @@ function getInterface(v: number) {
       root.jQ = $('<span class="mq-root-block"/>').appendTo(el);
       NodeBase.linkElementByBlockId(root.jQ[0], root.id);
       this.latex(contents.text());
+      ctrlr.aria.setContainer(root.jQ);
 
       this.revert = function () {
         return el

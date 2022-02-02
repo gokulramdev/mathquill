@@ -45,7 +45,12 @@ suite('Digit Grouping', function () {
       latex: '',
       tree: {
         classes: 'mq-root-block mq-empty',
-        content: '',
+        content: [
+          {
+            classes: 'mq-aria-alert',
+            content: '',
+          },
+        ],
       },
     });
 
@@ -354,7 +359,12 @@ suite('Digit Grouping', function () {
       latex: '',
       tree: {
         classes: 'mq-root-block mq-empty',
-        content: '',
+        content: [
+          {
+            classes: 'mq-aria-alert',
+            content: '',
+          },
+        ],
       },
     });
 
@@ -537,7 +547,12 @@ suite('Digit Grouping', function () {
       latex: '',
       tree: {
         classes: 'mq-root-block mq-empty',
-        content: '',
+        content: [
+          {
+            classes: 'mq-aria-alert',
+            content: '',
+          },
+        ],
       },
     });
 
@@ -725,7 +740,12 @@ suite('Digit Grouping', function () {
       latex: '',
       tree: {
         classes: 'mq-root-block mq-empty',
-        content: '',
+        content: [
+          {
+            classes: 'mq-aria-alert',
+            content: '',
+          },
+        ],
       },
     });
 
@@ -735,6 +755,10 @@ suite('Digit Grouping', function () {
       tree: {
         classes: 'mq-root-block mq-hasCursor',
         content: [
+          {
+            classes: 'mq-aria-alert',
+            content: '',
+          },
           {
             classes: 'mq-cursor',
           },
@@ -748,6 +772,10 @@ suite('Digit Grouping', function () {
       tree: {
         classes: 'mq-root-block mq-hasCursor',
         content: [
+          {
+            classes: 'mq-aria-alert',
+            content: '1',
+          },
           {
             classes: 'mq-digit',
             content: '1',
@@ -767,6 +795,10 @@ suite('Digit Grouping', function () {
       tree: {
         classes: 'mq-root-block mq-hasCursor',
         content: [
+          {
+            classes: 'mq-aria-alert',
+            content: '4',
+          },
           {
             classes: 'mq-digit',
             content: '1',
@@ -796,6 +828,10 @@ suite('Digit Grouping', function () {
       tree: {
         classes: 'mq-root-block mq-hasCursor',
         content: [
+          {
+            classes: 'mq-aria-alert',
+            content: '5',
+          },
           {
             classes: 'mq-digit',
             content: '1',
@@ -830,6 +866,10 @@ suite('Digit Grouping', function () {
           classes: 'mq-root-block mq-hasCursor',
           content: [
             {
+              classes: 'mq-aria-alert',
+              content: '5',
+            },
+            {
               classes: 'mq-digit',
               content: '1',
             },
@@ -862,6 +902,10 @@ suite('Digit Grouping', function () {
         tree: {
           classes: 'mq-root-block mq-hasCursor',
           content: [
+            {
+              classes: 'mq-aria-alert',
+              content: '5',
+            },
             {
               classes: 'mq-digit',
               content: '1',
@@ -896,6 +940,10 @@ suite('Digit Grouping', function () {
           classes: 'mq-root-block mq-hasCursor',
           content: [
             {
+              classes: 'mq-aria-alert',
+              content: '4',
+            },
+            {
               classes: 'mq-digit',
               content: '1',
             },
@@ -925,6 +973,10 @@ suite('Digit Grouping', function () {
           tree: {
             classes: 'mq-root-block',
             content: [
+              {
+                classes: 'mq-aria-alert',
+                content: '4',
+              },
               {
                 classes: 'mq-digit',
                 content: '1',
@@ -961,7 +1013,12 @@ suite('Digit Grouping', function () {
       latex: '',
       tree: {
         classes: 'mq-root-block mq-empty',
-        content: '',
+        content: [
+          {
+            classes: 'mq-aria-alert',
+            content: '',
+          },
+        ],
       },
     });
 
@@ -971,6 +1028,10 @@ suite('Digit Grouping', function () {
       tree: {
         classes: 'mq-root-block mq-hasCursor',
         content: [
+          {
+            classes: 'mq-aria-alert',
+            content: '',
+          },
           {
             classes: 'mq-cursor',
           },
@@ -984,6 +1045,10 @@ suite('Digit Grouping', function () {
       tree: {
         classes: 'mq-root-block mq-hasCursor mq-suppress-grouping',
         content: [
+          {
+            classes: 'mq-aria-alert',
+            content: '1',
+          },
           {
             classes: 'mq-digit',
             content: '1',
@@ -1003,6 +1068,10 @@ suite('Digit Grouping', function () {
       tree: {
         classes: 'mq-root-block mq-hasCursor mq-suppress-grouping',
         content: [
+          {
+            classes: 'mq-aria-alert',
+            content: '4',
+          },
           {
             classes: 'mq-digit mq-group-leading-1',
             content: '1',
@@ -1032,6 +1101,10 @@ suite('Digit Grouping', function () {
       tree: {
         classes: 'mq-root-block mq-hasCursor mq-suppress-grouping',
         content: [
+          {
+            classes: 'mq-aria-alert',
+            content: '5',
+          },
           {
             classes: 'mq-digit mq-group-leading-2',
             content: '1',
@@ -1066,6 +1139,10 @@ suite('Digit Grouping', function () {
           classes: 'mq-root-block mq-hasCursor',
           content: [
             {
+              classes: 'mq-aria-alert',
+              content: '5',
+            },
+            {
               classes: 'mq-digit mq-group-leading-2',
               content: '1',
             },
@@ -1098,6 +1175,10 @@ suite('Digit Grouping', function () {
         tree: {
           classes: 'mq-root-block mq-hasCursor',
           content: [
+            {
+              classes: 'mq-aria-alert',
+              content: '5',
+            },
             {
               classes: 'mq-digit mq-group-leading-2',
               content: '1',
@@ -1132,6 +1213,10 @@ suite('Digit Grouping', function () {
           classes: 'mq-root-block mq-hasCursor mq-suppress-grouping',
           content: [
             {
+              classes: 'mq-aria-alert',
+              content: '4',
+            },
+            {
               classes: 'mq-digit mq-group-leading-1',
               content: '1',
             },
@@ -1161,6 +1246,10 @@ suite('Digit Grouping', function () {
           tree: {
             classes: 'mq-root-block',
             content: [
+              {
+                classes: 'mq-aria-alert',
+                content: '4',
+              },
               {
                 classes: 'mq-digit mq-group-leading-1',
                 content: '1',
