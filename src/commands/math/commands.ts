@@ -898,9 +898,7 @@ LatexCmds.percent = LatexCmds.percentof = PercentOfBuilder;
 // parser / evaluator. We eat up the _ token in this node's parser.
 class Token extends MQSymbol {
   tokenId = '';
-
   ctrlSeq = '\\token';
-  htmlTemplate = '<span class="mq-token"></span>';
   textTemplate = ['token(', ')'];
   mathspeakTemplate = ['StartToken,', ', EndToken'];
   ariaLabel = 'token';
@@ -920,6 +918,8 @@ class Token extends MQSymbol {
             self.tokenId += (digit as Digit).ctrlSeq;
           }
         }
+
+        self.htmlTemplate = '<span class="mq-token" data-mq-token="'+ self.tokenId +'"></span>';
         return self;
       })
     })
