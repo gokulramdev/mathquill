@@ -333,7 +333,7 @@ class Controller_latex extends Controller_keystroke {
   }
   renderLatexMath(latex: string) {
     this.notify('replace');
-
+    this.cursor.clearSelection();
     if (this.renderLatexMathEfficiently(latex)) return;
     this.renderLatexMathFromScratch(latex);
   }
