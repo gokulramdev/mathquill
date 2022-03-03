@@ -302,6 +302,7 @@ function TextBlockFuseChildren(self: TextBlock) {
  * Text contents must always be nonempty.
  */
 class TextPiece extends MQNode {
+  parent: MQNode;
   textStr: string;
 
   constructor(text: string) {
