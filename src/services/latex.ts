@@ -131,16 +131,16 @@ class Controller_latex extends Controller_keystroke {
 
     return;
   }
-  renderLatexMathEfficiently(latex: string) {
+  updateLatexMathEfficiently(latex: unknown, oldLatex: unknown) {
+    // Note, benchmark/update.html is useful for measuring the
+    // performance of renderLatexMathEfficiently
     var root = this.root;
-    var oldLatex = this.exportLatex();
-    if (root.getEnd(L) && root.getEnd(R) && oldLatex === latex) {
-      return true;
-    }
     var oldClassification;
-    var classification = this.classifyLatexForEfficientUpdate(latex);
+    var classification = this.classifyLatexForEfficientUpdate(latex as string);
     if (classification) {
-      oldClassification = this.classifyLatexForEfficientUpdate(oldLatex);
+      oldClassification = this.classifyLatexForEfficientUpdate(
+        oldLatex as string
+      );
       if (
         !oldClassification ||
         oldClassification.prefix !== classification.prefix
@@ -291,8 +291,6 @@ class Controller_latex extends Controller_keystroke {
       return false;
     }
 
-    this.cursor.insAtRightEnd(root);
-
     var rightMost = root.getEnd(R);
     if (rightMost) {
       rightMost.fixDigitGrouping(this.cursor.options);
@@ -327,15 +325,19 @@ class Controller_latex extends Controller_keystroke {
     } else {
       jQ.empty();
     }
-    this.updateMathspeak();
-    delete cursor.selection;
-    cursor.insAtRightEnd(root);
   }
-  renderLatexMath(latex: string) {
+  renderLatexMath(latex: unknown) {
+    var cursor = this.cursor;
+    var root = this.root;
     this.notify('replace');
-    this.cursor.clearSelection();
-    if (this.renderLatexMathEfficiently(latex)) return;
-    this.renderLatexMathFromScratch(latex);
+    cursor.clearSelection();
+    var oldLatex = this.exportLatex();
+    if (!root.getEnd(L) || !root.getEnd(R) || oldLatex !== latex) {
+      this.updateLatexMathEfficiently(latex, oldLatex) ||
+        this.renderLatexMathFromScratch(latex as string);
+      this.updateMathspeak();
+    }
+    cursor.insAtRightEnd(root);
   }
   renderLatexText(latex: string) {
     var root = this.root,
