@@ -54,6 +54,8 @@ suite('autoOperatorNames', function () {
       for (var i = 0; i < str.length; i += 1) mq.typedText(str.charAt(i));
       assertLatex("typing '" + str + "'", latex);
       assert.equal(count, 1 + str.length);
+
+      Letter.prototype.autoUnItalicize = _autoUnItalicize;
     }
 
     assertAutoOperatorNamesWork('sin', '\\sin');
@@ -148,6 +150,8 @@ suite('autoOperatorNames', function () {
     mq.keystroke('Backspace');
     assertLatex('deleted plus', '\\csc s\\csc s\\csc sc');
     assert.equal(count, str.length + 5);
+
+    Letter.prototype.autoUnItalicize = _autoUnItalicize;
   });
 
   suite('override autoOperatorNames', function () {
