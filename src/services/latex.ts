@@ -142,13 +142,18 @@ class Controller_latex extends Controller_keystroke {
       root.domFrag().empty();
     }
     this.updateMathspeak();
-    delete cursor.selection;
-    cursor.insAtRightEnd(root);
   }
   renderLatexMath(latex: unknown) {
+    var root = this.root,
+      cursor = this.cursor;
     this.notify('replace');
-    this.cursor.clearSelection();
-    this.renderLatexMathFromScratch(latex);
+    cursor.clearSelection();
+    var oldLatex = this.exportLatex();
+    if (!root.getEnd(L) || !root.getEnd(R) || oldLatex !== latex) {
+      this.renderLatexMathFromScratch(latex);
+    }
+    delete cursor.selection;
+    cursor.insAtRightEnd(root);
   }
   renderLatexText(latex: string) {
     var root = this.root,
