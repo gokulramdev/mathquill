@@ -268,6 +268,7 @@ class Controller_keystroke extends Controller_focusBlur {
     // default browser action if so)
     if (cursor.parent === this.root) return;
 
+    cursor.clearSelection();
     cursor.parent.moveOutOf(dir, cursor);
     cursor.controller.aria.alert();
     return this.notify('move');
