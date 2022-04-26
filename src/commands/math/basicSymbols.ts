@@ -1302,7 +1302,7 @@ class Approx extends BinaryOperator {
   }
 }
 
-LatexCmds.tildeNbsp = bindVanillaSymbol('~', h('span', {}, [h.text(U_NO_BREAK_SPACE)]), 'tilde');
+LatexCmds.tildeNbsp = bindVanillaSymbol('~', U_NO_BREAK_SPACE, 'tilde');
 LatexCmds.sim = Sim;
 LatexCmds['≈'] = LatexCmds.approx = Approx;
 
@@ -1310,7 +1310,8 @@ LatexCmds['≈'] = LatexCmds.approx = Approx;
 // depending on whether the "interpretTildeAsSim" option is set.
 // Set to the nbsp in case the caller doesn't explicitly set this config option.
 LatexCmds['~'] = LatexCmds.tildeNbsp;
-baseOptionProcessors.interpretTildeAsSim = function(interpretAsSim: boolean | undefined) {
+baseOptionProcessors.interpretTildeAsSim = function(val: boolean | undefined) {
+  const interpretAsSim = !!val;
   if (interpretAsSim) {
     LatexCmds['~'] = LatexCmds.sim;
   } else {

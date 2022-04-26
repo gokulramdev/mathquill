@@ -60,6 +60,7 @@ const processedOptions = {
   autoOperatorNames: true,
   leftRightIntoCmdGoes: true,
   maxDepth: true,
+  interpretTildeAsSim: true
 };
 type ProcessedOption = keyof typeof processedOptions;
 
