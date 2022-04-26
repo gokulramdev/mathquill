@@ -1310,7 +1310,7 @@ LatexCmds['≈'] = LatexCmds.approx = Approx;
 // depending on whether the "interpretTildeAsSim" option is set.
 // Set to the nbsp in case the caller doesn't explicitly set this config option.
 LatexCmds['~'] = LatexCmds.tildeNbsp;
-baseOptionProcessors.interpretTildeAsSim = function(val: boolean | undefined) {
+baseOptionProcessors.interpretTildeAsSim = function (val: boolean | undefined) {
   const interpretAsSim = !!val;
   if (interpretAsSim) {
     LatexCmds['~'] = LatexCmds.sim;
@@ -1319,4 +1319,3 @@ baseOptionProcessors.interpretTildeAsSim = function(val: boolean | undefined) {
   }
   return interpretAsSim;
 };
-
