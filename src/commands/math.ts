@@ -600,7 +600,6 @@ class MathBlock extends MathElement {
       return (LatexCmds as LatexCmdsSingleCharBuilder)['×'](ch);
     else if (options && options.typingPercentWritesPercentOf && ch === '%')
       return (LatexCmds as LatexCmdsSingleCharBuilder).percentof(ch);
-    else if (ch === '~') return new (LatexCmds as LatexCmdsAny).sim(ch);
     else if (
       (cons = (CharCmds as CharCmdsAny)[ch] || (LatexCmds as LatexCmdsAny)[ch])
     ) {

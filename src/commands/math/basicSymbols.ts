@@ -1309,6 +1309,7 @@ LatexCmds['≈'] = LatexCmds.approx = Approx;
 // When interpreting raw LaTeX, we can either evaluate the tilde as its standard nonbreaking space
 // or transform it to the \sim operator depending on whether the "interpretTildeAsSim" configuration option is set.
 // Tilde symbols input from a keyboard will always be transformed to \sim.
+CharCmds['~'] = LatexCmds.sim;
 LatexCmds['~'] = LatexCmds.tildeNbsp;
 baseOptionProcessors.interpretTildeAsSim = function (val: boolean | undefined) {
   const interpretAsSim = !!val;
