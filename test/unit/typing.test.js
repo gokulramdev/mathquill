@@ -1478,36 +1478,7 @@ suite('typing with auto-replaces', function () {
       assertMathspeak('"a" to "b"');
     });
 
-    test('typing and backspacing ~ with interpretTildeAsSim = false', function () {
-      mq.config({ interpretTildeAsSim: false });
-      mq.typedText('~');
-      assertLatex('~');
-      assertMathspeak('tilde');
-      mq.typedText('~');
-      assertLatex('~~');
-      assertMathspeak('tilde tilde');
-      mq.typedText('~');
-      assertLatex('~~~');
-      assertMathspeak('tilde tilde tilde');
-      mq.keystroke('Backspace');
-      assertLatex('~~');
-      assertMathspeak('tilde tilde');
-      mq.keystroke('Backspace');
-      assertLatex('~');
-      assertMathspeak('tilde');
-      mq.keystroke('Backspace');
-      assertLatex('');
-      mq.typedText('a~b');
-      assertLatex('a~b');
-      assertMathspeak('"a" tilde "b"');
-      mq.keystroke('Backspace');
-      mq.typedText('~b');
-      assertLatex('a~~b');
-      assertMathspeak('"a" tilde tilde "b"');
-    });
-
-    test('typing and backspacing ~ with interpretTildeAsSim = true', function () {
-      mq.config({ interpretTildeAsSim: true });
+    test('typing and backspacing ~', function () {
       mq.typedText('~');
       assertLatex('\\sim');
       assertMathspeak('tilde');
@@ -1537,7 +1508,20 @@ suite('typing with auto-replaces', function () {
       mq.typedText('~b');
       assertLatex('a\\approx b');
       assertMathspeak('"a" approximately equal "b"');
+
+      // Now test that tilde is properly transformed when pasting in LaTeX.
+      mq.latex('');
+      mq.config({ interpretTildeAsSim: false });
+      mq.latex('a~b');
+      assertLatex('a~b');
+      assertMathspeak('"a" tilde "b"');
+      mq.latex('');
+      mq.config({ interpretTildeAsSim: true });
+      mq.latex('a~b');
+      assertLatex('a\\sim b');
+      assertMathspeak('"a" tilde "b"');
     });
+
     test('typing ≈ char directly', function () {
       mq.typedText('≈');
       assertLatex('\\approx');
