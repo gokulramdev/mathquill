@@ -1306,9 +1306,9 @@ LatexCmds.tildeNbsp = bindVanillaSymbol('~', U_NO_BREAK_SPACE, 'tilde');
 LatexCmds.sim = Sim;
 LatexCmds['≈'] = LatexCmds.approx = Approx;
 
-// The ~ could be entered as either a nonbreaking space (default) or as a substitute for the \sim operator,
-// depending on whether the "interpretTildeAsSim" option is set.
-// Set to the nbsp in case the caller doesn't explicitly set this config option.
+// When interpreting raw LaTeX, we can either evaluate the tilde as its standard nonbreaking space
+// or transform it to the \sim operator depending on whether the "interpretTildeAsSim" configuration option is set.
+// Tilde symbols input from a keyboard will always be transformed to \sim.
 LatexCmds['~'] = LatexCmds.tildeNbsp;
 baseOptionProcessors.interpretTildeAsSim = function (val: boolean | undefined) {
   const interpretAsSim = !!val;
