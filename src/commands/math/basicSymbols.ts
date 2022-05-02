@@ -1302,7 +1302,7 @@ class Approx extends BinaryOperator {
   }
 }
 
-LatexCmds.tildeNbsp = bindVanillaSymbol('~', U_NO_BREAK_SPACE, 'tilde');
+LatexCmds.tildeNbsp = bindVanillaSymbol('~', U_NO_BREAK_SPACE, ' ');
 LatexCmds.sim = Sim;
 LatexCmds['≈'] = LatexCmds.approx = Approx;
 
