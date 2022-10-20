@@ -846,6 +846,14 @@ LatexCmds.lim = class DisplayLimit extends MathCommand {
       domView
     );
   }
+  createLeftOf(cursor: Cursor) {
+    super.createLeftOf(cursor);
+    if (cursor.options.limStartsWithArrow) {
+      const arrow = new To();
+      arrow.createLeftOf(cursor);
+      cursor.insLeftOf(arrow);
+    }
+  }
   latexRecursive(ctx: LatexContext) {
     this.checkCursorContextOpen(ctx);
 
