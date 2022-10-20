@@ -50,6 +50,7 @@
         autoCommands:
           'alpha beta sqrt theta phi pi tau nthroot cbrt prod int ans percent mid square lim',
         autoParenthesizedFunctions: 'sin cos',
+        limStartsWithArrow: true,
         handlers: {
           edit: function () {
             if (!latex.is(':focus')) latex.val(mq.latex());
