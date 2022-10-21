@@ -870,7 +870,9 @@ LatexCmds.lim = class DisplayLimit extends MathCommand {
     this.checkCursorContextClose(ctx);
   }
   mathspeak() {
-    return this.ariaLabel + ' as ' + this.getEnd(L).mathspeak() + ' of ';
+    let out = this.ariaLabel + ' as ' + this.getEnd(L).mathspeak();
+    if (this[R]) out += ' of ';
+    return out;
   }
   parser() {
     var string = Parser.string;

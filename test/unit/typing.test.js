@@ -1234,7 +1234,10 @@ suite('typing with auto-replaces', function () {
       mq.typedText('lim');
       mq.typedText('x->y').keystroke('Right');
       assertLatex('\\lim_{x\\to y}');
-      assertMathspeak('limit as "x" goes to "y" of');
+      assertMathspeak('limit as "x" goes to "y"');
+      mq.typedText('x');
+      assertLatex('\\lim_{x\\to y}x');
+      assertMathspeak('limit as "x" goes to "y" of "x"');
       mq.keystroke('Ctrl-Backspace');
 
       mq.typedText('sqrt');
