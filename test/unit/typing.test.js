@@ -1232,8 +1232,9 @@ suite('typing with auto-replaces', function () {
       mq.keystroke('Ctrl-Backspace');
 
       mq.typedText('lim');
-      mq.typedText('xy').keystroke('Right');
-      assertLatex('\\lim_{xy}');
+      mq.typedText('x->y').keystroke('Right');
+      assertLatex('\\lim_{x\\to y}');
+      assertMathspeak('limit as "x" goes to "y" of');
       mq.keystroke('Ctrl-Backspace');
 
       mq.typedText('sqrt');
@@ -1457,30 +1458,30 @@ suite('typing with auto-replaces', function () {
       assertMathspeak('negative');
       mq.typedText('>');
       assertLatex('\\to');
-      assertMathspeak('to');
+      assertMathspeak('goes to');
       mq.typedText('-');
       assertLatex('\\to-');
-      assertMathspeak('to negative');
+      assertMathspeak('goes to negative');
       mq.typedText('>');
       assertLatex('\\to\\to');
-      assertMathspeak('to to');
+      assertMathspeak('goes to goes to');
       mq.keystroke('Backspace');
       assertLatex('\\to-');
-      assertMathspeak('to negative');
+      assertMathspeak('goes to negative');
       mq.keystroke('Backspace');
       assertLatex('\\to');
-      assertMathspeak('to');
+      assertMathspeak('goes to');
       mq.keystroke('Backspace');
       assertLatex('-');
       assertMathspeak('negative');
       mq.keystroke('Backspace');
       mq.typedText('a->b');
       assertLatex('a\\to b');
-      assertMathspeak('"a" to "b"');
+      assertMathspeak('"a" goes to "b"');
       mq.latex('');
       mq.typedText('a→b');
       assertLatex('a\\to b');
-      assertMathspeak('"a" to "b"');
+      assertMathspeak('"a" goes to "b"');
     });
 
     test('typing and backspacing ~', function () {

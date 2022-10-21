@@ -870,14 +870,7 @@ LatexCmds.lim = class DisplayLimit extends MathCommand {
     this.checkCursorContextClose(ctx);
   }
   mathspeak() {
-    return (
-      this.ariaLabel +
-      ' as ' +
-      this.getEnd(L).mathspeak() +
-      ', end ' +
-      this.ariaLabel +
-      ', '
-    );
+    return this.ariaLabel + ' as ' + this.getEnd(L).mathspeak() + ' of ';
   }
   parser() {
     var string = Parser.string;
@@ -905,7 +898,7 @@ LatexCmds.lim = class DisplayLimit extends MathCommand {
   finalizeTree() {
     this.downInto = this.ends[L];
     this.ends[L].upOutOf = insRightOfMeUnlessAtEnd;
-    this.ends[L].ariaLabel = 'limit';
+    this.ends[L].ariaLabel = 'limit underscript';
   }
 };
 

@@ -1109,7 +1109,7 @@ CharCmds['*'] =
 
 class To extends BinaryOperator {
   constructor() {
-    super('\\to ', h.entityText('&rarr;'), 'to');
+    super('\\to ', h.entityText('&rarr;'), 'goes to');
   }
   deleteTowards(dir: Direction, cursor: Cursor) {
     if (dir === L) {
