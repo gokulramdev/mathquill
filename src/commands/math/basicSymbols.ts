@@ -832,7 +832,7 @@ LatexCmds.alpha =
       new Variable('\\' + latex + ' ', h.entityText('&' + latex + ';'));
 
 //why can't anybody FUCKING agree on these
-LatexCmds.phi = bindVariable('\\phi ', '&#981;', 'phi'); //W3C or Unicode?
+LatexCmds.phi = bindVariable('\\phi ', '&#966;', 'phi'); //W3C or Unicode?
 
 LatexCmds.phiv = LatexCmds.varphi = bindVariable('\\varphi ', '&phi;', 'phi'); //Elsevier and 9573-13 //AMS and LaTeX
 
