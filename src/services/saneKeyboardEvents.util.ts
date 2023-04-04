@@ -249,6 +249,8 @@ var saneKeyboardEvents = (function () {
     function onKeyup(e: KeyboardEvent) {
       everyTick.trigger(e);
       if (e.target !== textarea) return;
+      // Don't process composed keyup events which have no valid mapping
+      if (e.key === 'Unidentified' || e.key === 'Process') return;
       // Handle case of no keypress event being sent
       if (!!keydown && !keypress) {
         // only check for typed text if this key can type text. Otherwise
@@ -360,6 +362,18 @@ var saneKeyboardEvents = (function () {
       everyTick.trigger(e);
     }
 
+    function onCompositionEnd(e: CompositionEvent) {
+      // Handle composed input events, such as those which come from dictation in Chrome.
+      everyTick.trigger(e);
+      if (!(textarea instanceof HTMLTextAreaElement) || e.target !== textarea)
+        return;
+      const text = e.data;
+      if (text.length === 0) return;
+      textarea.value = '';
+      controller.writeLatex(text);
+      controller.scrollHoriz();
+    }
+
     if (controller.options && controller.options.disableCopyPaste) {
       controller.addTextareaEventListeners({
         keydown: onKeydown,
@@ -377,6 +391,7 @@ var saneKeyboardEvents = (function () {
           e.preventDefault();
         },
         input: onInput,
+        compositionend: onCompositionEnd,
       });
     } else {
       controller.addTextareaEventListeners({
@@ -396,6 +411,7 @@ var saneKeyboardEvents = (function () {
         },
         paste: onPaste,
         input: onInput,
+        compositionend: onCompositionEnd,
       });
     }
 
