@@ -150,6 +150,7 @@ var saneKeyboardEvents = (function () {
   ) {
     var keydown: KeyboardEvent | null = null;
     var keypress: KeyboardEvent | null = null;
+    var isComposing: boolean = false;
 
     // everyTick.listen() is called after key or clipboard events to
     // say "Hey, I think something was just typed" or "pasted" etc,
@@ -249,8 +250,6 @@ var saneKeyboardEvents = (function () {
     function onKeyup(e: KeyboardEvent) {
       everyTick.trigger(e);
       if (e.target !== textarea) return;
-      // Don't process composed keyup events which have no valid mapping
-      if (e.key === 'Unidentified' || e.key === 'Process') return;
       // Handle case of no keypress event being sent
       if (!!keydown && !keypress) {
         // only check for typed text if this key can type text. Otherwise
@@ -266,6 +265,7 @@ var saneKeyboardEvents = (function () {
     }
 
     function typedText() {
+      if (isComposing) return;
       // If there is a selection, the contents of the textarea couldn't
       // possibly have just been typed in.
       // This happens in browsers like Firefox and Opera that fire
@@ -362,9 +362,15 @@ var saneKeyboardEvents = (function () {
       everyTick.trigger(e);
     }
 
+    function onCompositionStart(e: CompositionEvent) {
+      everyTick.trigger(e);
+      isComposing = true;
+    }
+
     function onCompositionEnd(e: CompositionEvent) {
       // Handle composed input events, such as those which come from dictation in Chrome.
       everyTick.trigger(e);
+      isComposing = false;
       if (!(textarea instanceof HTMLTextAreaElement) || e.target !== textarea)
         return;
       const text = e.data;
@@ -391,6 +397,7 @@ var saneKeyboardEvents = (function () {
           e.preventDefault();
         },
         input: onInput,
+        compositionstart: onCompositionStart,
         compositionend: onCompositionEnd,
       });
     } else {
@@ -411,6 +418,7 @@ var saneKeyboardEvents = (function () {
         },
         paste: onPaste,
         input: onInput,
+        compositionstart: onCompositionStart,
         compositionend: onCompositionEnd,
       });
     }
