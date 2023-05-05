@@ -56,13 +56,7 @@ class Controller_mouse extends Controller_latex {
     if (cursor.options.ignoreNextMousedown(e)) return;
     else cursor.options.ignoreNextMousedown = ignoreNextMouseDownNoop;
 
-    // some elements should not act like internal mathquill nodes. Tokens for instance define external
-    // click / hover behaviors. So we have mathquill act like the item was never clicked. This allows
-    // us to click a token without putting focus in the mathquill.
-    if (closest(e.target as HTMLElement | null, '.mq-ignore-mousedown')) {
-      return;
-    }
-
+    const mouseDownTarget = e.target;
     var lastMousemoveTarget: HTMLElement | null = null;
     function mousemove(e: Event) {
       lastMousemoveTarget = e.target as HTMLElement | null;
@@ -97,8 +91,58 @@ class Controller_mouse extends Controller_latex {
       }
     }
 
-    function onDocumentMouseUp() {
+    function onDocumentMouseUp(e: MouseEvent) {
       cursor.blink = blink;
+
+      // TODO - I imagine this doesn't work on mobile.
+      //
+      // TODO - is there a cleaner way to do this? My several attempts didn't work. I could only make
+      // it work by actually using the "ctrlr.seek()" method and couldn't just mutate the cursor[L] and
+      // cursor[R] to enclose the token.
+      //
+      // if after clicking in a mathquill we started on a token and ended on the same token we want
+      // to select the entire token. We will have placed the blinking cursor to either the left or
+      // the right of the token. If so, pretend to move the mouse the OTHER direction to select across
+      // the token.
+      if (!cursor.selection) {
+        const closestMouseDownToken = closest(
+          mouseDownTarget as HTMLElement | null,
+          '.mq-token'
+        );
+        const closestMouseUpToken = closest(
+          e.target as HTMLElement | null,
+          '.mq-token'
+        );
+        if (
+          closestMouseDownToken &&
+          closestMouseDownToken === closestMouseUpToken
+        ) {
+          const node = NodeBase.getNodeOfElement(closestMouseDownToken as any);
+          const rect = (
+            closestMouseDownToken as HTMLElement
+          )?.getBoundingClientRect();
+          if (rect) {
+            if (cursor[L] === node) {
+              ctrlr
+                .seek(
+                  closestMouseDownToken as HTMLElement,
+                  rect.left,
+                  e.clientY
+                )
+                .cursor.select();
+            } else if (cursor[R] === node) {
+              ctrlr
+                .seek(
+                  closestMouseDownToken as HTMLElement,
+                  rect.right,
+                  e.clientY
+                )
+                .cursor.select();
+            }
+          }
+        }
+      }
+
       if (!cursor.selection) updateCursor();
       unbindListeners();
     }
@@ -131,6 +175,7 @@ class Controller_mouse extends Controller_latex {
     }
 
     cursor.blink = noop;
+
     ctrlr
       .seek(e.target as HTMLElement | null, e.clientX, e.clientY)
       .cursor.startSelection();

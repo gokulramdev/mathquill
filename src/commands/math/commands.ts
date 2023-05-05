@@ -1020,7 +1020,7 @@ class Token extends MQSymbol {
 
   html(): Element | DocumentFragment {
     const out = h('span', {
-      class: 'mq-token mq-ignore-mousedown',
+      class: 'mq-token',
       'data-mq-token': this.tokenId,
     });
     this.setDOM(out);
