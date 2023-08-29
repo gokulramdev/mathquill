@@ -1,3 +1,5 @@
+[![mathquill pr linting](https://github.com/desmosinc/mathquill/actions/workflows/mathquill-pr-linting.yml/badge.svg)](https://github.com/desmosinc/mathquill/actions/workflows/mathquill-pr-linting.yml)
+
 # [MathQuill](http://mathquill.com)
 
 by [Han](http://github.com/laughinghan), [Jeanine](http://github.com/jneen), and [Mary](http://github.com/stufflebear) (<maintainers@mathquill.com>) [<img alt="slackin.mathquill.com" src="http://slackin.mathquill.com/badge.svg" align="top">](http://slackin.mathquill.com)
