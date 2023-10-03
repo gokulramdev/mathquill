@@ -144,11 +144,25 @@ class Controller_mouse extends Controller_latex {
 
   addMouseEventListener() {
     //drag-to-select event handling
-    this.container.addEventListener('mousedown', this.handleMouseDown);
+    if (this.cursor.options.addCustomMouseDownListener) {
+      this.cursor.options.addCustomMouseDownListener(
+        this.container,
+        this.handleMouseDown
+      );
+    } else {
+      this.container.addEventListener('mousedown', this.handleMouseDown);
+    }
   }
 
   removeMouseEventListener() {
-    this.container.removeEventListener('mousedown', this.handleMouseDown);
+    if (this.cursor.options.removeCustomMouseDownListener) {
+      this.cursor.options.removeCustomMouseDownListener(
+        this.container,
+        this.handleMouseDown
+      );
+    } else {
+      this.container.removeEventListener('mousedown', this.handleMouseDown);
+    }
   }
 
   seek(targetElm: Element | null, clientX: number, _clientY: number) {

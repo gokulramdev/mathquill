@@ -98,7 +98,14 @@ declare namespace MathQuill {
 
   namespace v1 {
     interface Config<$ = DefaultJquery> {
-      ignoreNextMousedown?: (_el: MouseEvent) => boolean;
+      addCustomMouseDownListener?: (
+        elt: HTMLElement,
+        fn: (evt: MouseEvent) => void
+      ) => void;
+      removeCustomMouseDownListener?: (
+        elt: HTMLElement,
+        fn: (evt: MouseEvent) => void
+      ) => void;
       substituteTextarea?: () => HTMLElement;
       substituteKeyboardEvents?: (
         textarea: $,

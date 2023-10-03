@@ -87,6 +87,15 @@ class Options {
   constructor(public version: 1 | 2 | 3) {}
 
   ignoreNextMousedown: (_el: MouseEvent) => boolean;
+  addCustomMouseDownListener: (
+    node: HTMLElement,
+    fn: (e: MouseEvent) => void
+  ) => void;
+  removeCustomMouseDownListener: (
+    node: HTMLElement,
+    fn: (e: MouseEvent) => void
+  ) => void;
+
   substituteTextarea: () => HTMLElement;
   /** Only used in interface versions 1 and 2. */
   substituteKeyboardEvents: SubstituteKeyboardEvents;
