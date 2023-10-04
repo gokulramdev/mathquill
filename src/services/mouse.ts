@@ -1,10 +1,15 @@
 /********************************************************
  * Deals with mouse events for clicking, drag-to-select
  *******************************************************/
-const ignoreNextMouseDownNoop = (_el: MouseEvent) => {
+const ignoreNextMouseDownNoop = (_el: PointerEvent | MouseEvent) => {
   return false;
 };
 Options.prototype.ignoreNextMousedown = ignoreNextMouseDownNoop;
+
+const canUsePointerEvents = !!window.PointerEvent;
+const MOUSE_DOWN_EVENT = canUsePointerEvents ? 'pointerdown' : 'mousedown';
+const MOUSE_MOVE_EVENT = canUsePointerEvents ? 'pointermove' : 'mousemove';
+const MOUSE_UP_EVENT = canUsePointerEvents ? 'pointerup' : 'mouseup';
 
 // Whenever edits to the tree occur, in-progress selection events
 // must be invalidated and selection changes must not be applied to
@@ -31,7 +36,7 @@ var cancelSelectionOnEdit:
 })();
 
 class Controller_mouse extends Controller_latex {
-  private handleMouseDown = (e: MouseEvent) => {
+  private handleMouseDown = (e: PointerEvent | MouseEvent) => {
     const rootElement = closest(
       e.target as HTMLElement | null,
       '.mq-root-block'
@@ -67,7 +72,7 @@ class Controller_mouse extends Controller_latex {
     function mousemove(e: Event) {
       lastMousemoveTarget = e.target as HTMLElement | null;
     }
-    function onDocumentMouseMove(e: MouseEvent) {
+    function onDocumentMouseMove(e: PointerEvent | MouseEvent) {
       if (!cursor.anticursor) cursor.startSelection();
       ctrlr.seek(lastMousemoveTarget, e.clientX, e.clientY).cursor.select();
       if (cursor.selection)
@@ -82,9 +87,9 @@ class Controller_mouse extends Controller_latex {
 
     function unbindListeners() {
       // delete the mouse handlers now that we're not dragging anymore
-      rootElement?.removeEventListener('mousemove', mousemove);
-      ownerDocument?.removeEventListener('mousemove', onDocumentMouseMove);
-      ownerDocument?.removeEventListener('mouseup', onDocumentMouseUp);
+      rootElement?.removeEventListener(MOUSE_MOVE_EVENT, mousemove);
+      ownerDocument?.removeEventListener(MOUSE_MOVE_EVENT, onDocumentMouseMove);
+      ownerDocument?.removeEventListener(MOUSE_UP_EVENT, onDocumentMouseUp);
       cancelSelectionOnEdit = undefined;
     }
 
@@ -135,20 +140,26 @@ class Controller_mouse extends Controller_latex {
       .seek(e.target as HTMLElement | null, e.clientX, e.clientY)
       .cursor.startSelection();
 
-    rootElement?.addEventListener('mousemove', mousemove);
-    ownerDocument?.addEventListener('mousemove', onDocumentMouseMove);
-    ownerDocument?.addEventListener('mouseup', onDocumentMouseUp);
-    // listen on document not just body to not only hear about mousemove and
-    // mouseup on page outside field, but even outside page, except iframes: https://github.com/mathquill/mathquill/commit/8c50028afcffcace655d8ae2049f6e02482346c5#commitcomment-6175800
+    const isFromMouse =
+      e.type === 'mousedown' ||
+      (e.type === 'pointerdown' && (e as PointerEvent).pointerType === 'mouse');
+    // only allow drag selection when using a mouse
+    if (isFromMouse) {
+      rootElement?.addEventListener(MOUSE_MOVE_EVENT, mousemove);
+      ownerDocument?.addEventListener(MOUSE_MOVE_EVENT, onDocumentMouseMove);
+      ownerDocument?.addEventListener(MOUSE_UP_EVENT, onDocumentMouseUp);
+      // listen on document not just body to not only hear about mousemove and
+      // mouseup on page outside field, but even outside page, except iframes: https://github.com/mathquill/mathquill/commit/8c50028afcffcace655d8ae2049f6e02482346c5#commitcomment-6175800
+    }
   };
 
   addMouseEventListener() {
     //drag-to-select event handling
-    this.container.addEventListener('mousedown', this.handleMouseDown);
+    this.container.addEventListener(MOUSE_DOWN_EVENT, this.handleMouseDown);
   }
 
   removeMouseEventListener() {
-    this.container.removeEventListener('mousedown', this.handleMouseDown);
+    this.container.removeEventListener(MOUSE_DOWN_EVENT, this.handleMouseDown);
   }
 
   seek(targetElm: Element | null, clientX: number, _clientY: number) {
