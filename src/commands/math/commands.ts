@@ -1,18 +1,26 @@
 /***************************
  * Commands and Operators.
  **************************/
-var SVG_SYMBOLS = {
-  sqrt: {
-    width: '',
-    html: () =>
-      h('svg', { preserveAspectRatio: 'none', viewBox: '0 0 32 54' }, [
-        h('path', {
-          d: 'M0 33 L7 27 L12.5 47 L13 47 L30 0 L32 0 L13 54 L11 54 L4.5 31 L0 33',
-        }),
-      ]),
-  },
+
+function em(x: number) {
+  // Anything small is a rounding error. Don't want to emit an "e"
+  if (x < 1e-6) x = 0;
+  // Anything big is unreachable.
+  if (x > 1e6) throw new Error('TODO-layout-engine: large length unreachable.');
+  return `${x}em`;
+}
+
+const svg_sqrt_html = () =>
+  h('svg', { preserveAspectRatio: 'none', viewBox: '0 0 32 54' }, [
+    h('path', {
+      d: 'M0 33 L7 27 L12.5 47 L13 47 L30 0 L32 0 L13 54 L11 54 L4.5 31 L0 33',
+    }),
+  ]);
+
+const SVG_SYMBOLS = {
   '|': {
     width: '.4em',
+    widthEm: 0.4,
     html: () =>
       h('svg', { preserveAspectRatio: 'none', viewBox: '0 0 10 54' }, [
         h('path', { d: 'M4.4 0 L4.4 54 L5.6 54 L5.6 0' }),
@@ -20,6 +28,7 @@ var SVG_SYMBOLS = {
   },
   '[': {
     width: '.55em',
+    widthEm: 0.55,
     html: () =>
       h('svg', { preserveAspectRatio: 'none', viewBox: '0 0 11 24' }, [
         h('path', { d: 'M8 0 L3 0 L3 24 L8 24 L8 23 L4 23 L4 1 L8 1' }),
@@ -27,6 +36,7 @@ var SVG_SYMBOLS = {
   },
   ']': {
     width: '.55em',
+    widthEm: 0.55,
     html: () =>
       h('svg', { preserveAspectRatio: 'none', viewBox: '0 0 11 24' }, [
         h('path', { d: 'M3 0 L8 0 L8 24 L3 24 L3 23 L7 23 L7 1 L3 1' }),
@@ -34,6 +44,7 @@ var SVG_SYMBOLS = {
   },
   '(': {
     width: '.55em',
+    widthEm: 0.55,
     html: () =>
       h('svg', { preserveAspectRatio: 'none', viewBox: '3 0 106 186' }, [
         h('path', {
@@ -43,6 +54,7 @@ var SVG_SYMBOLS = {
   },
   ')': {
     width: '.55em',
+    widthEm: 0.55,
     html: () =>
       h('svg', { preserveAspectRatio: 'none', viewBox: '3 0 106 186' }, [
         h('path', {
@@ -52,6 +64,7 @@ var SVG_SYMBOLS = {
   },
   '{': {
     width: '.7em',
+    widthEm: 0.7,
     html: () =>
       h('svg', { preserveAspectRatio: 'none', viewBox: '10 0 210 350' }, [
         h('path', {
@@ -61,6 +74,7 @@ var SVG_SYMBOLS = {
   },
   '}': {
     width: '.7em',
+    widthEm: 0.7,
     html: () =>
       h('svg', { preserveAspectRatio: 'none', viewBox: '10 0 210 350' }, [
         h('path', {
@@ -70,6 +84,7 @@ var SVG_SYMBOLS = {
   },
   '&#8741;': {
     width: '.7em',
+    widthEm: 0.7,
     html: () =>
       h('svg', { preserveAspectRatio: 'none', viewBox: '0 0 10 54' }, [
         h('path', { d: 'M3.2 0 L3.2 54 L4 54 L4 0 M6.8 0 L6.8 54 L6 54 L6 0' }),
@@ -77,6 +92,7 @@ var SVG_SYMBOLS = {
   },
   '&lang;': {
     width: '.55em',
+    widthEm: 0.55,
     html: () =>
       h('svg', { preserveAspectRatio: 'none', viewBox: '0 0 10 54' }, [
         h('path', { d: 'M6.8 0 L3.2 27 L6.8 54 L7.8 54 L4.2 27 L7.8 0' }),
@@ -84,6 +100,7 @@ var SVG_SYMBOLS = {
   },
   '&rang;': {
     width: '.55em',
+    widthEm: 0.55,
     html: () =>
       h('svg', { preserveAspectRatio: 'none', viewBox: '0 0 10 54' }, [
         h('path', { d: 'M3.2 0 L6.8 27 L3.2 54 L2.2 54 L5.8 27 L2.2 0' }),
@@ -103,7 +120,12 @@ class Style extends MathCommand {
   ) {
     super(
       ctrlSeq,
-      new DOMView(1, (blocks) => h.block(tagName, attrs, blocks[0]))
+      new DOMView(1, ([c]) => ({
+        dom: h.block(tagName, attrs, c),
+        /** TODO-layout-engine: styles are not all the same */
+        width: c.width,
+        height: c.height,
+      }))
     );
     this.ariaLabel = ariaLabel || ctrlSeq.replace(/^\\/, '');
     this.mathspeakTemplate = [
@@ -125,6 +147,7 @@ class Style extends MathCommand {
 }
 
 //fonts
+// TODO-layout-engine: pass font down?
 LatexCmds.mathrm = class extends Style {
   constructor() {
     super('\\mathrm', 'span', { class: 'mq-roman mq-font' }, 'Roman Font', {
@@ -148,6 +171,7 @@ LatexCmds.mathsf = () =>
   );
 LatexCmds.mathtt = () =>
   new Style('\\mathtt', 'span', { class: 'mq-monospace mq-font' }, 'Math Text');
+// TODO-layout-engine: These text-decoration (under, over) need special sizes
 //text-decoration
 LatexCmds.underline = () =>
   new Style(
@@ -191,17 +215,20 @@ LatexCmds.overarc = () =>
     { class: 'mq-non-leaf mq-overarc' },
     'Over Arc'
   );
+// \dot{x} creates x with a dot atop it.
 LatexCmds.dot = () => {
   return new MathCommand(
     '\\dot',
-    new DOMView(1, (blocks) =>
-      h('span', { class: 'mq-non-leaf' }, [
+    new DOMView(1, ([c]) => ({
+      dom: h('span', { class: 'mq-non-leaf' }, [
         h('span', { class: 'mq-dot-recurring-inner' }, [
           h('span', { class: 'mq-dot-recurring' }, [h.text(U_DOT_ABOVE)]),
-          h.block('span', { class: 'mq-empty-box' }, blocks[0]),
+          h.block('span', { class: 'mq-empty-box' }, c),
         ]),
-      ])
-    )
+      ]),
+      width: c.width,
+      height: c.height + 6.0625,
+    }))
   );
 };
 
@@ -217,13 +244,16 @@ LatexCmds.textcolor = class extends MathCommand {
 
   setColor(color: string) {
     this.color = color;
-    this.domView = new DOMView(1, (blocks) =>
-      h.block(
+    this.domView = new DOMView(1, ([c]) => ({
+      dom: h.block(
         'span',
         { class: 'mq-textcolor', style: 'color:' + color },
-        blocks[0]
-      )
-    );
+        c
+      ),
+      width: c.width,
+      height: c.height,
+    }));
+
     this.ariaLabel = color.replace(/^\\/, '');
     this.mathspeakTemplate = [
       'Start ' + this.ariaLabel + ',',
@@ -273,9 +303,11 @@ var Class = (LatexCmds['class'] = class extends MathCommand {
       .skip(string('}'))
       .then((cls) => {
         this.cls = cls || '';
-        this.domView = new DOMView(1, (blocks) =>
-          h.block('span', { class: `mq-class ${cls}` }, blocks[0])
-        );
+        this.domView = new DOMView(1, ([c]) => ({
+          dom: h.block('span', { class: `mq-class ${cls}` }, c),
+          width: c.width,
+          height: c.height,
+        }));
         this.ariaLabel = cls + ' class';
         this.mathspeakTemplate = [
           'Start ' + this.ariaLabel + ',',
@@ -506,7 +538,9 @@ class SupSub extends MathCommand {
         domFrag(h('span', { class: 'mq-sup' }))
           .append(block.domFrag().children())
           .prependTo(this.domFrag().oneElement())
-          .oneElement()
+          .oneElement(),
+        // TODO-layout-engine: incorrect
+        block.size()!
       );
       NodeBase.linkElementByBlockNode(block.domFrag().oneElement(), block);
     } else {
@@ -517,7 +551,9 @@ class SupSub extends MathCommand {
         domFrag(h('span', { class: 'mq-sub' }))
           .append(block.domFrag().children())
           .appendTo(this.domFrag().oneElement())
-          .oneElement()
+          .oneElement(),
+        // TODO-layout-engine: incorrect
+        block.size()!
       );
       NodeBase.linkElementByBlockNode(block.domFrag().oneElement(), block);
       this.domFrag().append(
@@ -590,14 +626,20 @@ function insLeftOfMeUnlessAtEnd(this: MQNode, cursor: Cursor) {
 class SubscriptCommand extends SupSub {
   supsub = 'sub' as const;
 
-  domView = new DOMView(1, (blocks) =>
-    h('span', { class: 'mq-supsub mq-non-leaf' }, [
-      h.block('span', { class: 'mq-sub' }, blocks[0]),
+  domView = new DOMView(1, ([c]) => ({
+    dom: h('span', { class: 'mq-supsub mq-non-leaf' }, [
+      h.block('span', { class: 'mq-sub' }, c),
       h('span', { style: 'display:inline-block;width:0' }, [
         h.text(U_ZERO_WIDTH_SPACE),
       ]),
-    ])
-  );
+    ]),
+    // TODO-layout-engine: This assumes font-size 90% on mq-supsub and font-size 80% on mq-sub
+    // for 72% total. The 80% is only contributed by Desmos CSS. The 90% is from mathquill CSS.
+    // TODO-layout-engine: Desmos reverts the 80% back to 100% in integral subscripts.
+    width: c.width * FONTSIZE_SUB,
+    // TODO-layout-engine: The vertical-align: -0.5em is on the sup-sub. Check if it's multiplied by 90%
+    height: c.height * FONTSIZE_SUB - 0.5,
+  }));
 
   textTemplate = ['_'];
 
@@ -619,11 +661,14 @@ LatexCmds.superscript =
     class SuperscriptCommand extends SupSub {
       supsub = 'sup' as const;
 
-      domView = new DOMView(1, (blocks) =>
-        h('span', { class: 'mq-supsub mq-non-leaf mq-sup-only' }, [
-          h.block('span', { class: 'mq-sup' }, blocks[0]),
-        ])
-      );
+      domView = new DOMView(1, ([sup]) => ({
+        dom: h('span', { class: 'mq-supsub mq-non-leaf mq-sup-only' }, [
+          h.block('span', { class: 'mq-sup' }, sup),
+        ]),
+        width: sup.width * FONTSIZE_SUP,
+        // TODO-layout-engine: The vertical-align: 0.5em is on the sup-sub. Check if it's multiplied by 90%
+        height: sup.height * FONTSIZE_SUP + 0.5,
+      }));
 
       textTemplate = ['^(', ')'];
       mathspeak(opts?: MathspeakOptions) {
@@ -677,17 +722,20 @@ LatexCmds.superscript =
     };
 
 class SummationNotation extends MathCommand {
-  constructor(ch: string, symbol: string, ariaLabel?: string) {
+  constructor(ch: string, symbol: string, size: Size, ariaLabel?: string) {
     super();
 
     this.ariaLabel = ariaLabel || ch.replace(/^\\/, '');
-    var domView = new DOMView(2, (blocks) =>
-      h('span', { class: 'mq-large-operator mq-non-leaf' }, [
-        h('span', { class: 'mq-to' }, [h.block('span', {}, blocks[1])]),
+    var domView = new DOMView(2, ([from, to]) => ({
+      dom: h('span', { class: 'mq-large-operator mq-non-leaf' }, [
+        h('span', { class: 'mq-to' }, [h.block('span', {}, to)]),
         h('big', {}, [h.text(symbol)]),
-        h('span', { class: 'mq-from' }, [h.block('span', {}, blocks[0])]),
-      ])
-    );
+        h('span', { class: 'mq-from' }, [h.block('span', {}, from)]),
+      ]),
+      // TODO-layout-engine: anything to add?
+      width: Math.max(from.width, to.width, size.width),
+      height: from.height + size.height + to.height,
+    }));
 
     MQSymbol.prototype.setCtrlSeqHtmlTextAndMathspeak.call(this, ch, domView);
   }
@@ -775,38 +823,47 @@ class SummationNotation extends MathCommand {
 LatexCmds['∑'] =
   LatexCmds.sum =
   LatexCmds.summation =
-    () => new SummationNotation('\\sum ', U_NARY_SUMMATION, 'sum');
+    () => new SummationNotation('\\sum ', U_NARY_SUMMATION, SIZE_SUM, 'sum');
 
 LatexCmds['∏'] =
   LatexCmds.prod =
   LatexCmds.product =
-    () => new SummationNotation('\\prod ', U_NARY_PRODUCT, 'product');
+    () =>
+      new SummationNotation('\\prod ', U_NARY_PRODUCT, SIZE_PROD, 'product');
 
 LatexCmds.coprod = LatexCmds.coproduct = () =>
-  new SummationNotation('\\coprod ', U_NARY_COPRODUCT, 'co product');
+  new SummationNotation(
+    '\\coprod ',
+    U_NARY_COPRODUCT,
+    SIZE_COPROD,
+    'co product'
+  );
 
 LatexCmds['∫'] =
   LatexCmds['int'] =
   LatexCmds.integral =
     class extends SummationNotation {
       constructor() {
-        super('\\int ', '', 'integral');
+        super('\\int ', '', SIZE_INT, 'integral');
 
         this.ariaLabel = 'integral';
-        this.domView = new DOMView(2, (blocks) =>
-          h('span', { class: 'mq-int mq-non-leaf' }, [
+        this.domView = new DOMView(2, ([sub, sup]) => ({
+          dom: h('span', { class: 'mq-int mq-non-leaf' }, [
             h('big', {}, [h.text(U_INTEGRAL)]),
             h('span', { class: 'mq-supsub mq-non-leaf' }, [
               h('span', { class: 'mq-sup' }, [
-                h.block('span', { class: 'mq-sup-inner' }, blocks[1]),
+                h.block('span', { class: 'mq-sup-inner' }, sup),
               ]),
-              h.block('span', { class: 'mq-sub' }, blocks[0]),
+              h.block('span', { class: 'mq-sub' }, sub),
               h('span', { style: 'display:inline-block;width:0' }, [
                 h.text(U_ZERO_WIDTH_SPACE),
               ]),
             ]),
-          ])
-        );
+          ]),
+          // TODO-layout-engine: incorrect
+          width: SIZE_INT.width + Math.max(sub.width, sup.width),
+          height: SIZE_INT.height + sub.width / 2 + sup.height / 2,
+        }));
       }
 
       createLeftOf(cursor: Cursor) {
@@ -821,15 +878,26 @@ var Fraction =
   LatexCmds.fraction =
     class FracNode extends MathCommand {
       ctrlSeq = '\\frac';
-      domView = new DOMView(2, (blocks) =>
-        h('span', { class: 'mq-fraction mq-non-leaf' }, [
-          h.block('span', { class: 'mq-numerator' }, blocks[0]),
-          h.block('span', { class: 'mq-denominator' }, blocks[1]),
+      domView = new DOMView(2, ([num, den]) => ({
+        dom: h('span', { class: 'mq-fraction mq-non-leaf' }, [
+          h.block('span', { class: 'mq-numerator' }, num),
+          h.block('span', { class: 'mq-denominator' }, den),
           h('span', { style: 'display:inline-block;width:0' }, [
             h.text(U_ZERO_WIDTH_SPACE),
           ]),
-        ])
-      );
+        ]),
+        // TODO-layout-engine: incorrect
+        width: Math.max(
+          num.width * FONTSIZE_FRAC,
+          den.width * FONTSIZE_FRAC,
+          SIZE_FRAC_BAR.width,
+          SIZE_EMPTY.width
+        ),
+        height:
+          Math.max(num.height * FONTSIZE_FRAC, SIZE_EMPTY.height) +
+          SIZE_FRAC_BAR.height +
+          Math.max(den.height * FONTSIZE_FRAC, SIZE_EMPTY.height),
+      }));
       textTemplate = ['(', ')/(', ')'];
       finalizeTree() {
         const endsL = this.getEnd(L);
@@ -981,6 +1049,8 @@ var LiveFraction =
 
 const AnsBuilder = () =>
   new MQSymbol(
+    // TODO-layout-engine: incorrect. "ans" is inserted dynamically
+    SIZE_ANS,
     '\\operatorname{ans}',
     h('span', { class: 'mq-ans' }, [h.text('ans')]),
     'ans'
@@ -989,6 +1059,7 @@ LatexCmds.ans = AnsBuilder;
 
 const PercentOfBuilder = () =>
   new MQSymbol(
+    SIZE_PERCENT_OF,
     '\\%\\operatorname{of}',
     h('span', { class: 'mq-nonSymbola mq-operator-name' }, [h.text('% of ')]),
     'percent of'
@@ -1018,14 +1089,18 @@ class Token extends MQSymbol {
   mathspeakTemplate = ['StartToken,', ', EndToken'];
   ariaLabel = 'token';
 
-  html(): Element | DocumentFragment {
+  constructor() {
+    super(SIZE_TOKEN);
+  }
+
+  html(): RenderedDOM {
     const out = h('span', {
       class: 'mq-token mq-ignore-mousedown',
       'data-mq-token': this.tokenId,
     });
-    this.setDOM(out);
+    this.setDOM(out, SIZE_TOKEN);
     NodeBase.linkElementByCmdNode(out, this);
-    return out;
+    return { dom: out, width: SIZE_TOKEN.width, height: SIZE_TOKEN.height };
   }
 
   latexRecursive(ctx: LatexContext): void {
@@ -1071,14 +1146,14 @@ LatexCmds.token = Token;
 
 class SquareRoot extends MathCommand {
   ctrlSeq = '\\sqrt';
-  domView = new DOMView(1, (blocks) =>
-    h('span', { class: 'mq-non-leaf mq-sqrt-container' }, [
-      h('span', { class: 'mq-scaled mq-sqrt-prefix' }, [
-        SVG_SYMBOLS.sqrt.html(),
-      ]),
-      h.block('span', { class: 'mq-non-leaf mq-sqrt-stem' }, blocks[0]),
-    ])
-  );
+  domView = new DOMView(1, ([c]) => ({
+    dom: h('span', { class: 'mq-non-leaf mq-sqrt-container' }, [
+      h('span', { class: 'mq-scaled mq-sqrt-prefix' }, [svg_sqrt_html()]),
+      h.block('span', { class: 'mq-non-leaf mq-sqrt-stem' }, c),
+    ]),
+    width: c.width + WIDTH_SQRT_PREFIX,
+    height: c.height + HEIGHT_SQRT_TOP,
+  }));
   textTemplate = ['sqrt(', ')'];
   mathspeakTemplate = ['StartRoot,', ', EndRoot'];
   ariaLabel = 'root';
@@ -1100,28 +1175,31 @@ LatexCmds.sqrt = SquareRoot;
 
 LatexCmds.hat = class Hat extends MathCommand {
   ctrlSeq = '\\hat';
-  domView = new DOMView(1, (blocks) =>
-    h('span', { class: 'mq-non-leaf' }, [
+  domView = new DOMView(1, ([c]) => ({
+    dom: h('span', { class: 'mq-non-leaf' }, [
       h('span', { class: 'mq-hat-prefix' }, [h.text('^')]),
-      h.block('span', { class: 'mq-hat-stem' }, blocks[0]),
-    ])
-  );
+      h.block('span', { class: 'mq-hat-stem' }, c),
+    ]),
+    width: c.width,
+    height: c.height + HEIGHT_HAT_TOP,
+  }));
 
   textTemplate = ['hat(', ')'];
 };
 
 class NthRoot extends SquareRoot {
-  domView = new DOMView(2, (blocks) =>
-    h('span', { class: 'mq-nthroot-container mq-non-leaf' }, [
-      h.block('sup', { class: 'mq-nthroot mq-non-leaf' }, blocks[0]),
+  domView = new DOMView(2, ([n, c]) => ({
+    dom: h('span', { class: 'mq-nthroot-container mq-non-leaf' }, [
+      h.block('sup', { class: 'mq-nthroot mq-non-leaf' }, n),
       h('span', { class: 'mq-scaled mq-sqrt-container' }, [
-        h('span', { class: 'mq-sqrt-prefix mq-scaled' }, [
-          SVG_SYMBOLS.sqrt.html(),
-        ]),
-        h.block('span', { class: 'mq-sqrt-stem mq-non-leaf' }, blocks[1]),
+        h('span', { class: 'mq-sqrt-prefix mq-scaled' }, [svg_sqrt_html()]),
+        h.block('span', { class: 'mq-sqrt-stem mq-non-leaf' }, c),
       ]),
-    ])
-  );
+    ]),
+    // TODO-layout-engine: incorrect
+    width: n.width * FONTSIZE_NTHROOT + WIDTH_SQRT_PREFIX + c.width,
+    height: (n.height * FONTSIZE_NTHROOT) / 2 + HEIGHT_SQRT_TOP + c.height,
+  }));
 
   textTemplate = ['sqrt[', '](', ')'];
   latexRecursive(ctx: LatexContext) {
@@ -1165,26 +1243,33 @@ LatexCmds.cbrt = class extends NthRoot {
 };
 
 class DiacriticAbove extends MathCommand {
-  constructor(ctrlSeq: string, html: ChildNode, textTemplate?: string[]) {
-    var domView = new DOMView(1, (blocks) =>
-      h('span', { class: 'mq-non-leaf' }, [
+  constructor(
+    size: Size,
+    ctrlSeq: string,
+    html: ChildNode,
+    textTemplate?: string[]
+  ) {
+    var domView = new DOMView(1, ([c]) => ({
+      dom: h('span', { class: 'mq-non-leaf' }, [
         h('span', { class: 'mq-diacritic-above' }, [html]),
-        h.block('span', { class: 'mq-diacritic-stem' }, blocks[0]),
-      ])
-    );
+        h.block('span', { class: 'mq-diacritic-stem' }, c),
+      ]),
+      width: Math.max(c.width, size.width),
+      height: c.height + size.height,
+    }));
     super(ctrlSeq, domView, textTemplate);
   }
 }
 LatexCmds.vec = () =>
-  new DiacriticAbove('\\vec', h.entityText('&rarr;'), ['vec(', ')']);
+  new DiacriticAbove(SIZE_VEC, '\\vec', h.entityText('&rarr;'), ['vec(', ')']);
 LatexCmds.tilde = () =>
-  new DiacriticAbove('\\tilde', h.text('~'), ['tilde(', ')']);
+  new DiacriticAbove(SIZE_TILDE, '\\tilde', h.text('~'), ['tilde(', ')']);
 
 class DelimsNode extends MathCommand {
   delimFrags: Ends<DOMFragment>;
 
-  setDOM(el: Element | undefined) {
-    super.setDOM(el);
+  setDOM(el: Element | undefined, size: Size) {
+    super.setDOM(el, size);
     const children = this.domFrag().children();
     if (!children.isEmpty()) {
       this.delimFrags = {
@@ -1222,13 +1307,13 @@ class Bracket extends DelimsNode {
   numBlocks() {
     return 1 as const;
   }
-  html() {
+  html(): RenderedDOM {
     var leftSymbol = this.getSymbol(L);
     var rightSymbol = this.getSymbol(R);
 
     // wait until now so that .side may
-    this.domView = new DOMView(1, (blocks) =>
-      h(
+    this.domView = new DOMView(1, ([c]) => ({
+      dom: h(
         // be set by createLeftOf or parser
         'span',
         { class: 'mq-non-leaf mq-bracket-container' },
@@ -1253,7 +1338,7 @@ class Bracket extends DelimsNode {
                 rightSymbol.width,
               class: 'mq-bracket-middle mq-non-leaf',
             },
-            blocks[0]
+            c
           ),
           h(
             'span',
@@ -1266,8 +1351,10 @@ class Bracket extends DelimsNode {
             [rightSymbol.html()]
           ),
         ]
-      )
-    );
+      ),
+      width: c.width + leftSymbol.widthEm + rightSymbol.widthEm,
+      height: c.width + HEIGHT_BRACKET,
+    }));
     return super.html();
   }
   getSymbol(side: BracketSide) {
@@ -1636,8 +1723,8 @@ var leftBinomialSymbol = SVG_SYMBOLS['('];
 var rightBinomialSymbol = SVG_SYMBOLS[')'];
 class Binomial extends DelimsNode {
   ctrlSeq = '\\binom';
-  domView = new DOMView(2, (blocks) =>
-    h('span', { class: 'mq-non-leaf mq-bracket-container' }, [
+  domView = new DOMView(2, ([upper, lower]) => ({
+    dom: h('span', { class: 'mq-non-leaf mq-bracket-container' }, [
       h(
         'span',
         {
@@ -1658,8 +1745,8 @@ class Binomial extends DelimsNode {
         },
         [
           h('span', { class: 'mq-array mq-non-leaf' }, [
-            h.block('span', {}, blocks[0]),
-            h.block('span', {}, blocks[1]),
+            h.block('span', {}, upper),
+            h.block('span', {}, lower),
           ]),
         ]
       ),
@@ -1671,8 +1758,13 @@ class Binomial extends DelimsNode {
         },
         [rightBinomialSymbol.html()]
       ),
-    ])
-  );
+    ]),
+    width:
+      Math.max(upper.width, lower.width) +
+      SVG_SYMBOLS['('].widthEm +
+      SVG_SYMBOLS[')'].widthEm,
+    height: upper.height + lower.height + 2 * TOP_BOTTOM_MARGIN_BINOMIAL,
+  }));
 
   textTemplate = ['choose(', ',', ')'];
   mathspeakTemplate = ['StartBinomial,', 'Choose', ', EndBinomial'];
@@ -1690,15 +1782,14 @@ LatexCmds.choose = class extends Binomial {
 class MathFieldNode extends MathCommand {
   name: string;
   ctrlSeq = '\\MathQuillMathField';
-  domView = new DOMView(1, (blocks) => {
-    return h('span', { class: 'mq-editable-field' }, [
-      h.block(
-        'span',
-        { class: 'mq-root-block', 'aria-hidden': 'true' },
-        blocks[0]
-      ),
-    ]);
-  });
+  domView = new DOMView(1, ([c]) => ({
+    dom: h('span', { class: 'mq-editable-field' }, [
+      h.block('span', { class: 'mq-root-block', 'aria-hidden': 'true' }, c),
+    ]),
+    // TODO-layout-engine: definitely incorrect.
+    width: c.width + WIDTH_MATHFIELD_PAD,
+    height: c.height + HEIGHT_MATHFIELD_PAD,
+  }));
   parser() {
     var self = this,
       string = Parser.string,
@@ -1792,14 +1883,20 @@ LatexCmds.editable = LatexCmds.MathQuillMathField = MathFieldNode; // backcompat
 // or by calling the global public API method .registerEmbed()
 // and rendering LaTeX like \embed{registeredName} (see test).
 class EmbedNode extends MQSymbol {
+  constructor() {
+    super(SIZE_EMBED);
+  }
   setOptions(options: EmbedOptions) {
     function noop() {
       return '';
     }
     this.text = options.text || noop;
-    this.domView = new DOMView(0, () =>
-      h('span', {}, [parseHTML(options.htmlString || '')])
-    );
+    this.domView = new DOMView(0, () => ({
+      dom: h('span', {}, [parseHTML(options.htmlString || '')]),
+      // TODO-layout-engine: incorrect
+      width: SIZE_EMBED.width,
+      height: SIZE_EMBED.height,
+    }));
     this.latex = options.latex || noop;
     return this;
   }

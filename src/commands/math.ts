@@ -77,10 +77,21 @@ class MathElement extends MQNode {
   }
 }
 
+interface Rendered extends Size {
+  readonly dom: Element;
+}
+
+interface RenderedDOM extends Size {
+  readonly dom: Node | DocumentFragment | Element;
+}
+interface RenderedBlock extends RenderedDOM {
+  readonly block: MathBlock;
+}
+
 class DOMView {
   constructor(
     public readonly childCount: number,
-    public readonly render: (blocks: MathBlock[]) => Element
+    public readonly render: (blocks: RenderedBlock[]) => Rendered
   ) {}
 }
 
@@ -268,14 +279,19 @@ class MathCommand extends MathElement {
    *
    * See dom.test.js for example templates and intended outputs.
    */
-  html(): Element | DocumentFragment {
-    const blocks = this.blocks;
+  html(): RenderedDOM {
     pray('domView is defined', this.domView);
     const template = this.domView;
-    const dom = template.render(blocks || []);
-    this.setDOM(dom);
-    NodeBase.linkElementByCmdNode(dom, this);
-    return dom;
+    const blocks = this.blocks || [];
+    const children = [];
+    for (const block of blocks) {
+      const { dom, width, height } = block.html();
+      children.push({ block, dom, width, height });
+    }
+    const r = template.render(children);
+    this.setDOM(r.dom, r);
+    NodeBase.linkElementByCmdNode(r.dom, this);
+    return r;
   }
 
   // methods to export a string representation of the math tree
@@ -341,6 +357,7 @@ class MathCommand extends MathElement {
  */
 class MQSymbol extends MathCommand {
   constructor(
+    size: Size,
     ctrlSeq?: string,
     html?: HTMLElement,
     text?: string,
@@ -350,7 +367,11 @@ class MQSymbol extends MathCommand {
     this.setCtrlSeqHtmlTextAndMathspeak(
       ctrlSeq,
       html
-        ? new DOMView(0, () => html.cloneNode(true) as HTMLElement)
+        ? new DOMView(0, () => ({
+            dom: html.cloneNode(true) as HTMLElement,
+            width: size.width,
+            height: size.height,
+          }))
         : undefined,
       text,
       mathspeak
@@ -420,25 +441,37 @@ class MQSymbol extends MathCommand {
   }
 }
 class VanillaSymbol extends MQSymbol {
-  constructor(ch: string, html?: ChildNode, mathspeak?: string) {
-    super(ch, h('span', {}, [html || h.text(ch)]), undefined, mathspeak);
+  constructor(size: Size, ch: string, html?: ChildNode, mathspeak?: string) {
+    super(size, ch, h('span', {}, [html || h.text(ch)]), undefined, mathspeak);
   }
 }
-function bindVanillaSymbol(
+
+function bindVanillaSymbolSized(
+  size: Size,
   ch: string,
   htmlEntity?: string,
   mathspeak?: string
 ) {
   return () =>
     new VanillaSymbol(
+      size,
       ch,
       htmlEntity ? h.entityText(htmlEntity) : undefined,
       mathspeak
     );
 }
 
+function bindVanillaSymbol(
+  ch: string,
+  htmlEntity?: string,
+  mathspeak?: string
+) {
+  return bindVanillaSymbolSized(SIZE_VANILLA_SYMBOL, ch, htmlEntity, mathspeak);
+}
+
 class BinaryOperator extends MQSymbol {
   constructor(
+    size: Size,
     ctrlSeq?: string,
     html?: ChildNode,
     text?: string,
@@ -447,6 +480,7 @@ class BinaryOperator extends MQSymbol {
   ) {
     if (treatLikeSymbol) {
       super(
+        size,
         ctrlSeq,
         h('span', {}, [html || h.text(ctrlSeq || '')]),
         undefined,
@@ -454,6 +488,7 @@ class BinaryOperator extends MQSymbol {
       );
     } else {
       super(
+        size,
         ctrlSeq,
         h('span', { class: 'mq-binary-operator' }, html ? [html] : []),
         text,
@@ -462,7 +497,9 @@ class BinaryOperator extends MQSymbol {
     }
   }
 }
-function bindBinaryOperator(
+
+function bindBinaryOperatorSized(
+  size: Size,
   ctrlSeq?: string,
   htmlEntity?: string,
   text?: string,
@@ -470,11 +507,27 @@ function bindBinaryOperator(
 ) {
   return () =>
     new BinaryOperator(
+      size,
       ctrlSeq,
       htmlEntity ? h.entityText(htmlEntity) : undefined,
       text,
       mathspeak
     );
+}
+
+function bindBinaryOperator(
+  ctrlSeq?: string,
+  htmlEntity?: string,
+  text?: string,
+  mathspeak?: string
+) {
+  return bindBinaryOperatorSized(
+    SIZE_BINARY_OPERATOR,
+    ctrlSeq,
+    htmlEntity,
+    text,
+    mathspeak
+  );
 }
 
 /**
@@ -490,14 +543,18 @@ class MathBlock extends MathElement {
       return fold + child[methodName]();
     });
   }
-  html() {
+  html(): RenderedDOM {
     const fragment = document.createDocumentFragment();
+    let width = 0;
+    let height = 0;
     this.eachChild((el) => {
-      const childHtml = el.html();
-      fragment.appendChild(childHtml);
+      const child = el.html();
+      fragment.appendChild(child.dom);
+      width += child.width;
+      height = Math.max(height, child.height);
       return undefined;
     });
-    return fragment;
+    return { dom: fragment, width, height };
   }
   latexRecursive(ctx: LatexContext) {
     this.checkCursorContextOpen(ctx);
@@ -627,7 +684,11 @@ class MathBlock extends MathElement {
       } else {
         return cons(ch);
       }
-    } else return new VanillaSymbol(ch);
+    } else {
+      // TODO-layout-engine: This assumes the width and height of unrecognized symbols.
+      // We may want to disallow unrecognized symbols entirely.
+      return new VanillaSymbol({ width: 8, height: 8 }, ch);
+    }
   }
   write(cursor: Cursor, ch: string) {
     var cmd = this.chToCmd(ch, cursor.options);
@@ -656,7 +717,7 @@ class MathBlock extends MathElement {
       block
         .children()
         .adopt(cursor.parent, cursor[L] as NodeRef, cursor[R] as NodeRef); // TODO - masking undefined. should be 0
-      domFrag(block.html()).insertBefore(cursor.domFrag());
+      domFrag(block.html().dom).insertBefore(cursor.domFrag());
       cursor[L] = block.getEnd(R);
       block.finalizeInsert(cursor.options, cursor);
       var blockEndsR = block.getEnd(R);

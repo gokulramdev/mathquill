@@ -279,7 +279,8 @@ function getInterface(v: number): MathQuill.v3.API | MathQuill.v1.API {
       root.setDOM(
         domFrag(h('span', { class: 'mq-root-block', 'aria-hidden': true }))
           .appendTo(el)
-          .oneElement()
+          .oneElement(),
+        SIZE_ROOT
       );
       NodeBase.linkElementByBlockNode(root.domFrag().oneElement(), root);
       this.latex(contents.text());
@@ -330,7 +331,7 @@ function getInterface(v: number): MathQuill.v3.API | MathQuill.v1.API {
       return this.__controller.exportLatexSelection();
     }
 
-    html() {
+    html(): string {
       return this.__controller.root
         .domFrag()
         .oneElement()

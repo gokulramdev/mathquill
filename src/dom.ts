@@ -48,7 +48,7 @@ interface HtmlBuilder {
   block(
     type: HTMLTagName,
     attributes: CreateElementAttributes | undefined,
-    block: MathBlock
+    r: RenderedBlock
   ): HTMLElement;
   entityText(s: string): Text;
 }
@@ -87,11 +87,11 @@ h.text = (s: string) => document.createTextNode(s);
 h.block = (
   type: HTMLTagName,
   attributes: CreateElementAttributes | undefined,
-  block: MathBlock
+  r: RenderedBlock
 ) => {
-  const out = h(type, attributes, [block.html()]);
-  block.setDOM(out);
-  NodeBase.linkElementByBlockNode(out, block);
+  const out = h(type, attributes, [r.dom as Element]);
+  r.block.setDOM(out, SIZE_HTML_BUILDER);
+  NodeBase.linkElementByBlockNode(out, r.block);
   return out;
 };
 

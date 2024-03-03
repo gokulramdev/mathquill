@@ -144,6 +144,7 @@ class NodeBase {
   }
 
   private _el: Element | Text | undefined;
+  private _size: Size | undefined;
   id = NodeBase.uniqueNodeId();
   ctrlSeq: string | undefined;
   ariaLabel: string | undefined;
@@ -168,7 +169,8 @@ class NodeBase {
     return '{{ MathQuill Node #' + this.id + ' }}';
   }
 
-  setDOM(el: Element | Text | undefined) {
+  // TODO-layout-engine: I think size is no longer needed, since html() now returns size.
+  setDOM(el: Element | Text | undefined, size: Size) {
     if (el) {
       pray(
         'DOM is an element or a text node',
@@ -177,11 +179,20 @@ class NodeBase {
     }
 
     this._el = el;
+    this._size = size;
     return this;
+  }
+
+  setSize(size: Size) {
+    this._size = size;
   }
 
   domFrag(): DOMFragment {
     return domFrag(this._el);
+  }
+
+  size(): Size | undefined {
+    return this._size;
   }
 
   createDir(dir: Direction, cursor: Cursor) {
@@ -320,7 +331,7 @@ class NodeBase {
     pray('Abstract parser() method is never called', false);
   }
   /** Render this node to DOM */
-  html(): Node | DocumentFragment {
+  html(): RenderedDOM {
     throw new Error('html() unimplemented in NodeBase');
   }
   text(): string {

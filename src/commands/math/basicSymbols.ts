@@ -1,6 +1,7 @@
 /*********************************
  * Symbols for Basic Mathematics
  ********************************/
+
 class DigitGroupingChar extends MQSymbol {
   finalizeTree(opts: CursorOptions, dir: Direction) {
     this.sharedSiblingMethod(opts, dir);
@@ -168,6 +169,7 @@ class DigitGroupingChar extends MQSymbol {
 class Digit extends DigitGroupingChar {
   constructor(ch: string, mathspeak?: string) {
     super(
+      SIZE_DIGIT,
       ch,
       h('span', { class: 'mq-digit' }, [h.text(ch)]),
       undefined,
@@ -225,7 +227,12 @@ class Variable extends MQSymbol {
   isItalic?: boolean;
 
   constructor(chOrCtrlSeq: string, html?: ChildNode) {
-    super(chOrCtrlSeq, h('var', {}, [html || h.text(chOrCtrlSeq)]));
+    super(
+      // TODO-layout-engine: incorrect.
+      SIZE_VARIABLE,
+      chOrCtrlSeq,
+      h('var', {}, [html || h.text(chOrCtrlSeq)])
+    );
   }
   text() {
     var text = this.ctrlSeq || '';
@@ -661,7 +668,8 @@ baseOptionProcessors.autoOperatorNames = function (cmds) {
 class OperatorName extends MQSymbol {
   ctrlSeq: string;
   constructor(fn?: string) {
-    super(fn || '');
+    // TODO-layout-engine: incorrect.
+    super(SIZE_VARIABLE, fn || '');
   }
   createLeftOf(cursor: Cursor) {
     var fn = this.ctrlSeq;
@@ -720,9 +728,11 @@ LatexCmds.f = class extends Letter {
     super(letter);
 
     this.letter = letter;
-    this.domView = new DOMView(0, () =>
-      h('var', { class: 'mq-f' }, [h.text('f')])
-    );
+    this.domView = new DOMView(0, () => ({
+      dom: h('var', { class: 'mq-f' }, [h.text('f')]),
+      width: SIZE_F.width,
+      height: SIZE_F.height,
+    }));
   }
   italicize(bool: boolean) {
     // Why is this necesssary? Does someone replace the `f` at some
@@ -735,43 +745,74 @@ LatexCmds.f = class extends Letter {
 
 // VanillaSymbol's
 LatexCmds[' '] = LatexCmds.space = () =>
-  new DigitGroupingChar('\\ ', h('span', {}, [h.text(U_NO_BREAK_SPACE)]), ' ');
+  new DigitGroupingChar(
+    SIZE_SPACE,
+    '\\ ',
+    h('span', {}, [h.text(U_NO_BREAK_SPACE)]),
+    ' '
+  );
 
 LatexCmds['.'] = () =>
   new DigitGroupingChar(
+    SIZE_PERIOD,
     '.',
     h('span', { class: 'mq-digit' }, [h.text('.')]),
     '.'
   );
 
-LatexCmds["'"] = LatexCmds.prime = bindVanillaSymbol("'", '&prime;', 'prime');
-LatexCmds['″'] = LatexCmds.dprime = bindVanillaSymbol(
+LatexCmds["'"] = LatexCmds.prime = bindVanillaSymbolSized(
+  SIZE_PRIME,
+  "'",
+  '&prime;',
+  'prime'
+);
+LatexCmds['″'] = LatexCmds.dprime = bindVanillaSymbolSized(
+  SIZE_DPRIME,
   '″',
   '&Prime;',
   'double prime'
 );
 
-LatexCmds.backslash = bindVanillaSymbol('\\backslash ', '\\', 'backslash');
+LatexCmds.backslash = bindVanillaSymbolSized(
+  SIZE_BACKSLASH,
+  '\\backslash ',
+  '\\',
+  'backslash'
+);
 if (!CharCmds['\\']) CharCmds['\\'] = LatexCmds.backslash;
 
-LatexCmds.$ = bindVanillaSymbol('\\$', '$', 'dollar');
+LatexCmds.$ = bindVanillaSymbolSized(SIZE_DOLLAR, '\\$', '$', 'dollar');
 
-LatexCmds.square = bindVanillaSymbol('\\square ', '\u25A1', 'square');
-LatexCmds.mid = bindVanillaSymbol('\\mid ', '\u2223', 'mid');
+LatexCmds.square = bindVanillaSymbolSized(
+  SIZE_SQUARE,
+  '\\square ',
+  '\u25A1',
+  'square'
+);
+LatexCmds.mid = bindVanillaSymbolSized(SIZE_MID, '\\mid ', '\u2223', 'mid');
 
 // does not use Symbola font
 class NonSymbolaSymbol extends MQSymbol {
-  constructor(ch: string, html?: ChildNode, _unusedMathspeak?: string) {
-    super(ch, h('span', { class: 'mq-nonSymbola' }, [html || h.text(ch)]));
+  constructor(
+    size: Size,
+    ch: string,
+    html?: ChildNode,
+    _unusedMathspeak?: string
+  ) {
+    super(
+      size,
+      ch,
+      h('span', { class: 'mq-nonSymbola' }, [html || h.text(ch)])
+    );
   }
 }
 
-LatexCmds['@'] = () => new NonSymbolaSymbol('@');
+LatexCmds['@'] = () => new NonSymbolaSymbol(SIZE_AT, '@');
 LatexCmds['&'] = () =>
-  new NonSymbolaSymbol('\\&', h.entityText('&amp;'), 'and');
+  new NonSymbolaSymbol(SIZE_AMPERSAND, '\\&', h.entityText('&amp;'), 'and');
 LatexCmds['%'] = class extends NonSymbolaSymbol {
   constructor() {
-    super('\\%', h.text('%'), 'percent');
+    super(SIZE_PERCENT, '\\%', h.text('%'), 'percent');
   }
   parser() {
     var optWhitespace = Parser.optWhitespace;
@@ -789,19 +830,22 @@ LatexCmds['%'] = class extends NonSymbolaSymbol {
   }
 };
 
-LatexCmds['∥'] = LatexCmds.parallel = bindVanillaSymbol(
+LatexCmds['∥'] = LatexCmds.parallel = bindVanillaSymbolSized(
+  SIZE_PARALLEL,
   '\\parallel ',
   '&#x2225;',
   'parallel'
 );
 
-LatexCmds['∦'] = LatexCmds.nparallel = bindVanillaSymbol(
+LatexCmds['∦'] = LatexCmds.nparallel = bindVanillaSymbolSized(
+  SIZE_NPARALLEL,
   '\\nparallel ',
   '&#x2226;',
   'not parallel'
 );
 
-LatexCmds['⟂'] = LatexCmds.perp = bindVanillaSymbol(
+LatexCmds['⟂'] = LatexCmds.perp = bindVanillaSymbolSized(
+  SIZE_PERP,
   '\\perp ',
   '&#x27C2;',
   'perpendicular'
@@ -909,9 +953,14 @@ LatexCmds['ϱ'] =
 
 //Greek constants, look best in non-italicized Times New Roman
 LatexCmds.pi = LatexCmds['π'] = () =>
-  new NonSymbolaSymbol('\\pi ', h.entityText('&pi;'), 'pi');
+  new NonSymbolaSymbol(SIZE_PI, '\\pi ', h.entityText('&pi;'), 'pi');
 LatexCmds['λ'] = LatexCmds.lambda = () =>
-  new NonSymbolaSymbol('\\lambda ', h.entityText('&lambda;'), 'lambda');
+  new NonSymbolaSymbol(
+    SIZE_LAMBDA,
+    '\\lambda ',
+    h.entityText('&lambda;'),
+    'lambda'
+  );
 
 //uppercase greek letters
 
@@ -922,6 +971,7 @@ LatexCmds['Υ'] =
   LatexCmds.Upsih = //'cos it makes sense to me
     () =>
       new MQSymbol(
+        SIZE_UPSILON,
         '\\Upsilon ',
         h('var', { style: 'font-family: serif' }, [h.entityText('&upsih;')]),
         'capital upsilon'
@@ -931,7 +981,11 @@ LatexCmds['Υ'] =
 
 function bindUppercaseGreek(latex: string) {
   return () =>
-    new VanillaSymbol('\\' + latex + ' ', h.entityText('&' + latex + ';'));
+    new VanillaSymbol(
+      SIZE_UPPERCASE_GREEK,
+      '\\' + latex + ' ',
+      h.entityText('&' + latex + ';')
+    );
 }
 
 LatexCmds['Γ'] = LatexCmds.Gamma = bindUppercaseGreek('Gamma');
@@ -963,7 +1017,7 @@ class LatexFragment extends MathCommand {
       .children()
       .adopt(cursor.parent, cursor[L] as MQNode, cursor[R] as MQNode);
     cursor[L] = block.getEnd(R);
-    domFrag(block.html()).insertBefore(cursor.domFrag());
+    domFrag(block.html().dom).insertBefore(cursor.domFrag());
     block.finalizeInsert(cursor.options, cursor);
     var blockEndsR = block.getEnd(R);
     var blockEndsRR = blockEndsR && blockEndsR[R];
@@ -1083,7 +1137,7 @@ function isBinaryOperator(node: NodeRef): boolean {
 
 var PlusMinus = class extends BinaryOperator {
   constructor(ch?: string, html?: ChildNode, mathspeak?: string) {
-    super(ch, html, undefined, mathspeak, true);
+    super(SIZE_PLUS_MINUS, ch, html, undefined, mathspeak, true);
   }
 
   contactWeld(cursor: Cursor, dir?: Direction) {
@@ -1139,11 +1193,11 @@ LatexCmds.mp =
 CharCmds['*'] =
   LatexCmds.sdot =
   LatexCmds.cdot =
-    bindBinaryOperator('\\cdot ', '&middot;', '*', 'times'); //semantically should be &sdot;, but &middot; looks better
+    bindBinaryOperatorSized(SIZE_CDOT, '\\cdot ', '&middot;', '*', 'times'); //semantically should be &sdot;, but &middot; looks better
 
 class To extends BinaryOperator {
   constructor() {
-    super('\\to ', h.entityText('&rarr;'), 'to');
+    super(SIZE_TO, '\\to ', h.entityText('&rarr;'), 'to');
   }
   deleteTowards(dir: Direction, cursor: Cursor) {
     if (dir === L) {
@@ -1170,6 +1224,7 @@ class Inequality extends BinaryOperator {
   constructor(data: InequalityData, strict: boolean) {
     var strictness: '' | 'Strict' = strict ? 'Strict' : '';
     super(
+      SIZE_INEQUALITY,
       data[`ctrlSeq${strictness}`],
       h.entityText(data[`htmlEntity${strictness}`]),
       data[`text${strictness}`],
@@ -1259,15 +1314,15 @@ LatexCmds['∞'] =
   LatexCmds.infty =
   LatexCmds.infin =
   LatexCmds.infinity =
-    bindVanillaSymbol('\\infty ', '&infin;', 'infinity');
+    bindVanillaSymbolSized(SIZE_INFINITY, '\\infty ', '&infin;', 'infinity');
 LatexCmds['≠'] =
   LatexCmds.ne =
   LatexCmds.neq =
-    bindBinaryOperator('\\ne ', '&ne;', 'not equal');
+    bindBinaryOperatorSized(SIZE_NOT_EQUALS, '\\ne ', '&ne;', 'not equal');
 
 class Equality extends BinaryOperator {
   constructor() {
-    super('=', h.text('='), '=', 'equals');
+    super(SIZE_EQUALS, '=', h.text('='), '=', 'equals');
   }
   createLeftOf(cursor: Cursor) {
     var cursorL = cursor[L];
@@ -1287,17 +1342,17 @@ LatexCmds['='] = Equality;
 LatexCmds['×'] =
   LatexCmds.times =
   LatexCmds.cross =
-    bindBinaryOperator('\\times ', '&times;', '[x]', 'times');
+    bindBinaryOperatorSized(SIZE_TIMES, '\\times ', '&times;', '[x]', 'times');
 
 LatexCmds['÷'] =
   LatexCmds.div =
   LatexCmds.divide =
   LatexCmds.divides =
-    bindBinaryOperator('\\div ', '&divide;', '[/]', 'over');
+    bindBinaryOperatorSized(SIZE_DIV, '\\div ', '&divide;', '[/]', 'over');
 
 class Sim extends BinaryOperator {
   constructor() {
-    super('\\sim ', h.text('~'), '~', 'tilde');
+    super(SIZE_SIM, '\\sim ', h.text('~'), '~', 'tilde');
   }
   createLeftOf(cursor: Cursor) {
     if (cursor[L] instanceof Sim) {
@@ -1317,7 +1372,13 @@ class Sim extends BinaryOperator {
 
 class Approx extends BinaryOperator {
   constructor() {
-    super('\\approx ', h.entityText('&approx;'), '≈', 'approximately equal');
+    super(
+      SIZE_APPROX,
+      '\\approx ',
+      h.entityText('&approx;'),
+      '≈',
+      'approximately equal'
+    );
   }
   deleteTowards(dir: Direction, cursor: Cursor) {
     if (dir === L) {
@@ -1335,7 +1396,12 @@ class Approx extends BinaryOperator {
   }
 }
 
-LatexCmds.tildeNbsp = bindVanillaSymbol('~', U_NO_BREAK_SPACE, ' ');
+LatexCmds.tildeNbsp = bindVanillaSymbolSized(
+  SIZE_NBSP,
+  '~',
+  U_NO_BREAK_SPACE,
+  ' '
+);
 LatexCmds.sim = Sim;
 LatexCmds['≈'] = LatexCmds.approx = Approx;
 

@@ -12,14 +12,16 @@ CharCmds['\\'] = class LatexCommandInput extends MathCommand {
       return false;
     };
   }
-  domView = new DOMView(1, (blocks) =>
-    h('span', { class: 'mq-latex-command-input-wrapper mq-non-leaf' }, [
+  domView = new DOMView(1, (blocks) => ({
+    dom: h('span', { class: 'mq-latex-command-input-wrapper mq-non-leaf' }, [
       h('span', { class: 'mq-latex-command-input mq-non-leaf' }, [
         h.text('\\'),
         h.block('span', {}, blocks[0]),
       ]),
-    ])
-  );
+    ]),
+    width: SIZE_LATEX_COMMAND_INPUT.width,
+    height: SIZE_LATEX_COMMAND_INPUT.height,
+  }));
   textTemplate = ['\\'];
   createBlocks() {
     super.createBlocks();
@@ -41,7 +43,7 @@ CharCmds['\\'] = class LatexCommandInput extends MathCommand {
       cursor.show().deleteSelection();
 
       if (ch.match(/[a-z]/i)) {
-        new VanillaSymbol(ch).createLeftOf(cursor);
+        new VanillaSymbol(SIZE_VANILLA_SYMBOL, ch).createLeftOf(cursor);
         // TODO needs tests
         cursor.controller.aria.alert(ch);
       } else {
@@ -102,7 +104,10 @@ CharCmds['\\'] = class LatexCommandInput extends MathCommand {
     this.checkCursorContextClose(ctx);
   }
   renderCommand(cursor: Cursor) {
-    this.setDOM(this.domFrag().children().lastElement());
+    this.setDOM(
+      this.domFrag().children().lastElement(),
+      SIZE_LATEX_COMMAND_INPUT
+    );
     this.remove();
     if (this[R]) {
       cursor.insLeftOf(this[R] as MQNode);

@@ -22,12 +22,12 @@ class TextBlock extends MQNode {
   }
 
   setDOMFrag(el: Element | undefined) {
-    super.setDOM(el);
+    super.setDOM(el, SIZE_TEXT);
     const endsL = this.getEnd(L);
     if (endsL) {
       const children = this.domFrag().children();
       if (!children.isEmpty()) {
-        endsL.setDOM(children.oneText());
+        endsL.setDOM(children.oneText(), SIZE_TEXT);
       }
     }
     return this;
@@ -94,13 +94,13 @@ class TextBlock extends MQNode {
 
     this.checkCursorContextClose(ctx);
   }
-  html() {
+  html(): RenderedDOM {
     const out = h('span', { class: 'mq-text-mode' }, [
       h.text(this.textContents()),
     ]);
-    this.setDOM(out);
+    this.setDOM(out, SIZE_TEXT);
     NodeBase.linkElementByCmdNode(out, this);
-    return out;
+    return { dom: out, width: SIZE_TEXT.width, height: SIZE_TEXT.height };
   }
 
   mathspeakTemplate = ['StartText', 'EndText'];
@@ -162,7 +162,7 @@ class TextBlock extends MQNode {
       else if (cursorL instanceof TextPiece) cursorL.appendText(ch);
     } else if (this.isEmpty()) {
       cursor.insRightOf(this);
-      new VanillaSymbol('\\$', h.text('$')).createLeftOf(cursor);
+      new VanillaSymbol(SIZE_DOLLAR, '\\$', h.text('$')).createLeftOf(cursor);
     } else if (!cursor[R]) cursor.insRightOf(this);
     else if (!cursor[L]) cursor.insLeftOf(this);
     else {
@@ -291,7 +291,7 @@ function TextBlockFuseChildren(self: TextBlock) {
   //   http://reference.sitepoint.com/javascript/Node/nodeType
 
   var textPc = new TextPiece(textPcDom.data);
-  textPc.setDOM(textPcDom);
+  textPc.setDOM(textPcDom, SIZE_TEXT);
 
   self.children().disown();
   textPc.adopt(self, 0, 0);
@@ -312,10 +312,10 @@ class TextPiece extends MQNode {
     super();
     this.textStr = text;
   }
-  html() {
+  html(): RenderedDOM {
     const out = h.text(this.textStr);
-    this.setDOM(out);
-    return out;
+    this.setDOM(out, SIZE_TEXT);
+    return { dom: out, width: SIZE_TEXT.width, height: SIZE_TEXT.height };
   }
   appendText(text: string) {
     this.textStr += text;
@@ -336,7 +336,7 @@ class TextPiece extends MQNode {
       this,
       this[R]
     );
-    newPc.setDOM(this.domFrag().oneText().splitText(i));
+    newPc.setDOM(this.domFrag().oneText().splitText(i), SIZE_TEXT);
     this.textStr = this.textStr.slice(0, i);
     return newPc;
   }
@@ -438,11 +438,11 @@ function makeTextBlock(
     mathspeakTemplate = ['Start' + ariaLabel, 'End' + ariaLabel];
     ariaLabel = ariaLabel;
 
-    html() {
+    html(): RenderedDOM {
       const out = h(tagName, attrs, [h.text(this.textContents())]);
-      this.setDOM(out);
+      this.setDOM(out, SIZE_TEXT);
       NodeBase.linkElementByCmdNode(out, this);
-      return out;
+      return { dom: out, width: SIZE_TEXT.width, height: SIZE_TEXT.height };
     }
   };
 }
@@ -489,9 +489,11 @@ class RootMathCommand extends MathCommand {
     super('$');
     this.cursor = cursor;
   }
-  domView = new DOMView(1, (blocks) =>
-    h.block('span', { class: 'mq-math-mode' }, blocks[0])
-  );
+  domView = new DOMView(1, ([c]) => ({
+    dom: h.block('span', { class: 'mq-math-mode' }, c),
+    width: c.width,
+    height: c.height,
+  }));
   createBlocks() {
     super.createBlocks();
     const endsL = this.getEnd(L) as RootMathCommand; // TODO - how do we know this is a RootMathCommand?
@@ -501,7 +503,9 @@ class RootMathCommand extends MathCommand {
       else if (this.isEmpty()) {
         cursor.insRightOf(this.parent);
         this.parent.deleteTowards(undefined!, cursor);
-        new VanillaSymbol('\\$', h.text('$')).createLeftOf(cursor.show());
+        new VanillaSymbol(SIZE_DOLLAR, '\\$', h.text('$')).createLeftOf(
+          cursor.show()
+        );
       } else if (!cursor[R]) cursor.insRightOf(this.parent);
       else if (!cursor[L]) cursor.insLeftOf(this.parent);
       else MathBlock.prototype.write.call(this, cursor, ch);
@@ -528,7 +532,7 @@ class RootTextBlock extends RootMathBlock {
       var html;
       if (ch === '<') html = h.entityText('&lt;');
       else if (ch === '>') html = h.entityText('&gt;');
-      new VanillaSymbol(ch, html).createLeftOf(cursor);
+      new VanillaSymbol(SIZE_VANILLA_SYMBOL, ch, html).createLeftOf(cursor);
     }
   }
 }

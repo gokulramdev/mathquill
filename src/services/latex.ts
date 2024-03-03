@@ -40,7 +40,7 @@ var latexMathParser = (function () {
     return new Digit(c);
   });
   var symbol = regex(/^[^${}\\_^]/).map(function (c) {
-    return new VanillaSymbol(c);
+    return new VanillaSymbol(SIZE_VANILLA_SYMBOL, c);
   });
 
   var controlSequence = regex(/^[^\\a-eg-zA-Z]/) // hotfix #164; match MathBlock::write
@@ -273,7 +273,7 @@ class Controller_latex extends Controller_keystroke {
       var newMinusNode = new PlusMinus('-');
       var minusSpan = document.createElement('span');
       minusSpan.textContent = '-';
-      newMinusNode.setDOM(minusSpan);
+      newMinusNode.setDOM(minusSpan, SIZE_PLUS_MINUS);
 
       var oldCharNodes0L = oldCharNodes[0][L];
       if (oldCharNodes0L) oldCharNodes0L[R] = newMinusNode;
@@ -324,7 +324,7 @@ class Controller_latex extends Controller_keystroke {
 
         var newNode = new Digit(newDigits[i]);
         newNode.parent = root;
-        newNode.setDOM(span);
+        newNode.setDOM(span, SIZE_DIGIT);
         frag.appendChild(span);
 
         // splice this node in
@@ -377,7 +377,7 @@ class Controller_latex extends Controller_keystroke {
     if (block) {
       const frag = root.domFrag();
       frag.children().remove();
-      frag.oneElement().appendChild(block.html());
+      frag.oneElement().appendChild(block.html().dom);
       root.finalizeInsert(cursor.options, cursor);
     } else {
       root.domFrag().empty();
@@ -430,7 +430,7 @@ class Controller_latex extends Controller_keystroke {
     var escapedDollar = string('\\$').result('$');
     var textChar = escapedDollar
       .or(regex(/^[^$]/))
-      .map((ch) => new VanillaSymbol(ch));
+      .map((ch) => new VanillaSymbol(SIZE_VANILLA_SYMBOL, ch));
     var latexText = mathMode.or(textChar).many();
     var commands = latexText
       .skip(eof)
@@ -442,7 +442,7 @@ class Controller_latex extends Controller_keystroke {
         commands[i].adopt(root, root.getEnd(R), 0);
       }
 
-      domFrag(root.html()).appendTo(root.domFrag().oneElement());
+      domFrag(root.html().dom).appendTo(root.domFrag().oneElement());
 
       root.finalizeInsert(cursor.options, cursor);
     }
