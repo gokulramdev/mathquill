@@ -8,6 +8,10 @@ suite('autoOperatorNames', function () {
     autoCommands: 'sum int',
     disableAutoSubstitutionInSubscripts: true,
   };
+  const subscriptConfigNoLog = {
+    autoCommands: 'sum int',
+    disableAutoSubstitutionInSubscripts: { except: 'log' },
+  };
 
   setup(function () {
     mq = MQ.MathField($('<span></span>').appendTo('#mock')[0]);
@@ -79,15 +83,34 @@ suite('autoOperatorNames', function () {
   });
 
   test('no auto operator names in simple subscripts when typing', function () {
+    // normal
     mq.config(normalConfig);
     mq.typedText('x_');
     mq.typedText('sin');
     assertLatex('subscripts turn to operatorname', 'x_{\\sin}');
+
+    // subscript config
     mq.latex('');
     mq.config(subscriptConfig);
     mq.typedText('x_');
     mq.typedText('sin');
     assertLatex('subscripts do not turn to operatorname', 'x_{sin}');
+
+    // log subscript without config option
+    mq.latex('');
+    mq.config(subscriptConfig);
+    mq.typedText('log_');
+    mq.typedText('sin');
+    assertLatex('subscripts do not turn to operatorname', '\\log_{sin}');
+
+    // log subscript
+    mq.latex('');
+    mq.config(subscriptConfigNoLog);
+    mq.typedText('log_');
+    mq.typedText('sin');
+    assertLatex('log subscript does turn to operatorname', '\\log_{\\sin}');
+
+    // revert config
     mq.config(normalConfig);
   });
 
