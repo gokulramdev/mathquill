@@ -99,14 +99,16 @@ suite('autoOperatorNames', function () {
     // log subscript without config option
     mq.latex('');
     mq.config(subscriptConfig);
-    mq.typedText('log_');
+    mq.typedText('log');
+    mq.typedText('_');
     mq.typedText('sin');
     assertLatex('subscripts do not turn to operatorname', '\\log_{sin}');
 
     // log subscript
     mq.latex('');
     mq.config(subscriptConfigNoLog);
-    mq.typedText('log_');
+    mq.typedText('log');
+    mq.typedText('_');
     mq.typedText('sin');
     assertLatex('log subscript does turn to operatorname', '\\log_{\\sin}');
 
