@@ -82,6 +82,21 @@ suite('autoOperatorNames', function () {
     assertLatex('int allows operatorname', '\\int_{\\sin}^{ }');
   });
 
+  test('works in subscript after log, based on "except" option', function () {
+    // log subscript without config option
+    mq.config(subscriptConfig);
+    mq.typedText('\\log_');
+    mq.typedText('sin');
+    assertLatex('subscripts do not turn to operatorname', '\\log_{sin}');
+
+    // log subscript
+    mq.latex('');
+    mq.config(subscriptConfigNoLog);
+    mq.typedText('\\log_');
+    mq.typedText('sin');
+    assertLatex('log subscript does turn to operatorname', '\\log_{\\sin}');
+  });
+
   test('no auto operator names in simple subscripts when typing', function () {
     // normal
     mq.config(normalConfig);
@@ -95,23 +110,6 @@ suite('autoOperatorNames', function () {
     mq.typedText('x_');
     mq.typedText('sin');
     assertLatex('subscripts do not turn to operatorname', 'x_{sin}');
-
-    // log subscript without config option
-    mq.latex('');
-    mq.config(subscriptConfig);
-    mq.typedText('\\log_');
-    mq.typedText('sin');
-    assertLatex('subscripts do not turn to operatorname', '\\log_{sin}');
-
-    // log subscript
-    mq.latex('');
-    mq.config(subscriptConfigNoLog);
-    mq.typedText('\\log_');
-    mq.typedText('sin');
-    assertLatex('log subscript does turn to operatorname', '\\log_{\\sin}');
-
-    // revert config
-    mq.config(normalConfig);
   });
 
   test('no auto operator names in simple subscripts when pasting', function () {
